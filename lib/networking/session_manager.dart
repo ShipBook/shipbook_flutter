@@ -10,6 +10,7 @@
 
 import 'dart:convert';
 // import '../event_emitter.dart';
+import 'package:shipbook_flutter/log_manager.dart';
 import 'package:shipbook_flutter/storage.dart';
 
 import '../models/user.dart';
@@ -117,7 +118,8 @@ class SessionManager {
     if (!config.exceptionReportDisabled)  print('exception enabled');//exceptionManager.start();
     if (!config.eventLoggingDisabled) print('event loggint enabled');//eventManager.enableAppState();
     else print('event logging disabled'); //eventManager.removeAppState();
-    // logManager.config(config);
+
+    LogManager().config(config);
   }
 
   void logout() {

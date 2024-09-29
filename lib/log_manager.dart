@@ -1,21 +1,32 @@
 
 
-import 'package:shipbook_flutter/models/message.dart';
-import 'package:shipbook_flutter/models/response/config_response.dart';
-
-import '/models/appenders/base_appender.dart';
+import 'models/appenders/appender_factory.dart';
+import 'models/message.dart';
+import 'models/response/config_response.dart';
+import 'models/appenders/base_appender.dart';
+import 'inner_log.dart';
 import 'models/severity.dart';
 import 'models/base_log.dart';
 
-abstract class Logger {
-  String get key;
-  Severity get severity;
-  Severity get callStackSeverity;
-  BaseAppender get appender;
+class Logger {
+  String key;
+  Severity severity;
+  Severity callStackSeverity;
+  BaseAppender appender;
+
+  Logger(this.key, this.severity, this.callStackSeverity, this.appender);
 }
 
 
 class LogManager {
+  static final LogManager _instance = LogManager._internal();
+
+  factory LogManager() {
+    return _instance;
+  }
+
+  LogManager._internal();
+
   final Map<String, BaseAppender> appenders = {};
   final List<Logger> loggers = [];
 
@@ -87,10 +98,28 @@ class LogManager {
   void config(ConfigResponse config) {
     clear();
     for (final appender in config.appenders) {
-      add(appender, appender.name);
+      try {
+        final config = ConfigResponse.fromJson(appender.config ?? {});
+        final base = AppenderFactory.create(appender.type, appender.name, config);
+        appenders[appender.name] = base;
+      } catch (e) {
+        innerLog.e('Error creating appender: $appender.name');
+      }
     }
+
     for (final logger in config.loggers) {
-      loggers.add(logger);
+      final appender = appenders[logger.appenderRef];
+      if (appender != null) {
+        final log = Logger(
+          logger.name ?? '', 
+          stringToSeverity(logger.severity), 
+          stringToSeverity(logger.callStackSeverity ?? 'Off'), 
+          appender
+        );
+        loggers.add(log);
+      }
     }
+
+    // TODO: Add event emitter
   }
 }
