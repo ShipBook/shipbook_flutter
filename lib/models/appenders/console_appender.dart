@@ -5,6 +5,7 @@ import '../response/config_response.dart';
 import 'base_appender.dart';
 
 class ConsoleAppender implements BaseAppender {
+  @override
   final String name;
   final String? pattern;
   ConsoleAppender(this.name, ConfigResponse? config) : pattern = config?.appenders.firstWhere((element) => element.name == name).config?['pattern'];

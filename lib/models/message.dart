@@ -8,10 +8,10 @@ class Message extends BaseLog {
   Severity severity;
   String? tag; // it is initialized after the promise.
   String? stackTrace;
-  String? error;
+  Error? error;
   String? function;
   String? fileName;
-  String? lineNumber;
+  int? lineNumber;
   
   Message(this.message, 
           this.severity,

@@ -5,6 +5,8 @@ void main() {
   runApp(const MyApp());
 }
 
+final log = Shipbook.getLogger("main");
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -60,6 +62,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
+
+    log.i('Incrementing counter');
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
