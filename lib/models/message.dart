@@ -1,3 +1,5 @@
+import 'package:shipbook_flutter/inner_log.dart';
+
 import 'severity.dart';
 
 import 'base_log.dart';
@@ -22,7 +24,19 @@ class Message extends BaseLog {
           this.fileName,
           this.lineNumber) : super(LogType.message) {
     if (fileName == null) {
-      // TODO: implement this
+      final stackTrace = StackTrace.current.toString();
+      innerLog.d('StackTrace: $stackTrace');
+      final line = stackTrace.split('\n')[3];
+      innerLog.d('Line: $line');
+      final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+):(\d+)\)');
+      final match = regex.firstMatch(line);
+
+      if (match != null) {
+        function = match.group(1);
+        fileName = match.group(2);
+        lineNumber = int.parse(match.group(3)!);
+        innerLog.d('Function: $function FileName: $fileName LineNumber: $lineNumber');
+      } 
     }
   }
 
