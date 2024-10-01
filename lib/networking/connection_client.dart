@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
+import 'package:shipbook_flutter/models/response/config_response.dart';
 
 import './session_manager.dart';
 
@@ -10,7 +11,7 @@ enum HttpMethod { get, post, put, delete }
 class ConnectionClient {
   static const BASE_URL = "https://api.shipbook.io/v1/";
 
-  Future<Response> request(String url, [Map<String, dynamic>? body, HttpMethod method = HttpMethod.get]) async {
+  Future<Response> request(String url, [JsonMap? body, HttpMethod method = HttpMethod.get]) async {
     Response resp;
     final uri = Uri.parse(BASE_URL + url);
     final headers = {

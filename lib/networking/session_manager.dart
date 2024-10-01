@@ -77,16 +77,16 @@ class SessionManager {
   }
 
   Future<String?> innerLogin() async {
-    print('innerLogin');
     if (isInLoginRequest || loginObj == null) return null;
 
     isInLoginRequest = true;
     token = null;
     try {
       var loginObjData = loginObj!.toJsonMap();
-      print('loginObjData: $loginObjData');
+      innerLog.d('loginObjData: $loginObjData');
+
       var resp = await connectionClient.request('auth/loginSdk', loginObjData, HttpMethod.post);
-      print('resp: $resp');
+      innerLog.d('resp: $resp');
       isInLoginRequest = false;
 
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
@@ -129,7 +129,7 @@ class SessionManager {
     innerLogin();
   }
 
-  void registerUser(String userId,  {String? userName, String? fullName, String? email, String? phoneNumber, Map<String, dynamic>? additionalInfo}) {
+  void registerUser(String userId,  {String? userName, String? fullName, String? email, String? phoneNumber, JsonMap? additionalInfo}) {
     user = User(userId:userId, userName: userName, fullName: fullName, email: email, phoneNumber: phoneNumber, additionalInfo: additionalInfo);
     // if (_loginObj != null) eventEmitter.emit(USER_CHANGE);
   }

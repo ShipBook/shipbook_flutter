@@ -1,5 +1,7 @@
+typedef JsonMap = Map<String, dynamic>;
+
 class ConfigResponse {
-  Map<String, dynamic> additionalProperties = {};
+  JsonMap additionalProperties = {};
   bool eventLoggingDisabled = false;
   bool exceptionReportDisabled = false;
   List<AppenderResponse> appenders = [];
@@ -16,7 +18,7 @@ class ConfigResponse {
   });
 
   // Factory method to create a ConfigResponse from JSON
-  factory ConfigResponse.fromJson(Map<String, dynamic> json) {
+  factory ConfigResponse.fromJson(JsonMap json) {
     return ConfigResponse(
       additionalProperties: json['additionalProperties'] ?? {},
       eventLoggingDisabled: json['eventLoggingDisabled'] ?? false,
@@ -37,7 +39,7 @@ class ConfigResponse {
 class AppenderResponse {
   String type;
   String name;
-  Map<String, dynamic>? config;
+  JsonMap? config;
 
   AppenderResponse({
     required this.type,
@@ -46,7 +48,7 @@ class AppenderResponse {
   });
 
   // Factory method to create an AppenderResponse from JSON
-  factory AppenderResponse.fromJson(Map<String, dynamic> json) {
+  factory AppenderResponse.fromJson(JsonMap json) {
     return AppenderResponse(
       type: json['type'],
       name: json['name'],
@@ -69,7 +71,7 @@ class LoggerResponse {
   });
   
   // Factory method to create a LoggerResponse from JSON
-  factory LoggerResponse.fromJson(Map<String, dynamic> json) {
+  factory LoggerResponse.fromJson(JsonMap json) {
     return LoggerResponse(
       name: json['name'],
       severity: json['severity'],
@@ -90,7 +92,7 @@ class RootResponse {
   });
 
   // Factory method to create a RootResponse from JSON
-  factory RootResponse.fromJson(Map<String, dynamic> json) {
+  factory RootResponse.fromJson(JsonMap json) {
     return RootResponse(
       severity: json['severity'],
       appenderRef: json['appenderRef'],

@@ -1,18 +1,21 @@
+import 'package:shipbook_flutter/inner_log.dart';
+
 import '../base_log.dart';
 import '../message.dart';
-import '../response/config_response.dart';
 
+import '../response/config_response.dart';
 import 'base_appender.dart';
 
 class ConsoleAppender implements BaseAppender {
   @override
   final String name;
   final String? pattern;
-  ConsoleAppender(this.name, ConfigResponse? config) : pattern = config?.appenders.firstWhere((element) => element.name == name).config?['pattern'];
-
-
+  ConsoleAppender(this.name, JsonMap? config) : pattern = config?['pattern'] {
+    innerLog.i('ConsoleAppender pattern: $pattern');
+  }
+  
   @override
-  void update(ConfigResponse? config) {
+  void update(JsonMap? config) {
     // Do nothing
   }
 
@@ -20,8 +23,9 @@ class ConsoleAppender implements BaseAppender {
   void push(log) {
     if (log.type == LogType.message) {
       final message = log as Message;
-      final text = '$message.fileName $message.lineNumber $message.message';
-      print('$message.severity $text');
+      final text = '${message.fileName} ${message.lineNumber} ${message.message}';
+      // ignore: avoid_print
+      print('${message.severity} $text');
     }
     
   }

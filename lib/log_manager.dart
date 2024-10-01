@@ -99,7 +99,7 @@ class LogManager {
     clear();
     for (final appender in config.appenders) {
       try {
-        final config = ConfigResponse.fromJson(appender.config ?? {});
+        final config = appender.config ?? {};
         final base = AppenderFactory.create(appender.type, appender.name, config);
         appenders[appender.name] = base;
       } catch (e) {

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'response/config_response.dart';
 
 import 'user.dart';
 
@@ -59,7 +60,7 @@ class Login {
     appBuild = packageInfo.buildNumber;
   }
 
-  Map<String, dynamic> toJsonMap() {
+  JsonMap toJsonMap() {
     return {
       'appId': appId,
       'appKey': appKey,
@@ -83,7 +84,7 @@ class Login {
   }
 
     // Create a Login object from a JSON map
-  factory Login.fromJsonMap(Map<String, dynamic> jsonMap) {
+  factory Login.fromJsonMap(JsonMap jsonMap) {
     return Login(
       jsonMap['appId'],
       jsonMap['appKey'],

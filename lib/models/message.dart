@@ -1,4 +1,4 @@
-import 'package:shipbook_flutter/models/severity.dart';
+import 'severity.dart';
 
 import 'base_log.dart';
 

@@ -1,14 +1,17 @@
 import '../response/config_response.dart';
+
+import '../../inner_log.dart';
 import 'base_appender.dart';
 
 class SBCloudAppender implements BaseAppender {
   @override
   final String name;
-  final String? pattern;
-  SBCloudAppender(this.name, ConfigResponse? config) : pattern = config?.appenders.firstWhere((element) => element.name == name).config?['pattern'];
+  SBCloudAppender(this.name, JsonMap? config){
+    innerLog.i('SBCloudAppender created');
+  }  
 
   @override
-  void update(ConfigResponse? config) {
+  void update(JsonMap? config) {
     // Do nothing
   }
 

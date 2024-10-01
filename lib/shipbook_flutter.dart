@@ -1,5 +1,7 @@
 library shipbook_flutter;
 
+import 'models/response/config_response.dart';
+
 import '../networking/session_manager.dart';
 
 import 'inner_log.dart';
@@ -23,7 +25,7 @@ class Shipbook {
     // connectionClient.BASE_URL = url;
   }
 
-  static void registerUser(String userId, {String? userName, String? fullName, String? email, String? phoneNumber, Map<String, dynamic>? additionalInfo}) {
+  static void registerUser(String userId, {String? userName, String? fullName, String? email, String? phoneNumber, JsonMap? additionalInfo}) {
     // sessionManager.registerUser(userId, userName, fullName, email, phoneNumber, additionalInfo);
   }
 

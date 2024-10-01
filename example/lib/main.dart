@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    Shipbook.enableInnerLog(true);
     Shipbook.start("64bea27426fa5e22a43b02ec", "10f193043b53eb916239e1ab08c8b4c7");
     return MaterialApp(
       title: 'Flutter Demo',

@@ -1,3 +1,5 @@
+import 'response/config_response.dart';
+
 class User {
   String userId;
   String? userName;
@@ -16,7 +18,7 @@ class User {
   });
 
   // Create a User object from a JSON map
-  factory User.fromJsonMap(Map<String, dynamic> jsonMap) {
+  factory User.fromJsonMap(JsonMap jsonMap) {
     return User(
       userId: jsonMap['userId'],
       userName: jsonMap['userName'],
@@ -28,7 +30,7 @@ class User {
   }
 
   // Create a JSON map from a User object
-  Map<String, dynamic> toJsonMap() {
+  JsonMap toJsonMap() {
     return {
       'userId': userId,
       'userName': userName,
