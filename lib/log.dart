@@ -7,7 +7,7 @@ class Log {
   final String tag;
   
   Log(this.tag)  {
-    print("Shipbook: $tag");
+    // print("Shipbook: $tag");
   }
   // static e(String message){
   //   print("Shipbook: $message");

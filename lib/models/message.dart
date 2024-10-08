@@ -25,9 +25,7 @@ class Message extends BaseLog {
           this.lineNumber) : super(LogType.message) {
     if (fileName == null) {
       final stackTrace = StackTrace.current.toString();
-      innerLog.d('StackTrace: $stackTrace');
       final line = stackTrace.split('\n')[3];
-      innerLog.d('Line: $line');
       final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+):(\d+)\)');
       final match = regex.firstMatch(line);
 
@@ -35,7 +33,7 @@ class Message extends BaseLog {
         function = match.group(1);
         fileName = match.group(2);
         lineNumber = int.parse(match.group(3)!);
-        innerLog.d('Function: $function FileName: $fileName LineNumber: $lineNumber');
+        InnerLog().d('Function: $function FileName: $fileName LineNumber: $lineNumber');
       } 
     }
   }

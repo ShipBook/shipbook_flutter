@@ -12,6 +12,7 @@ void main() {
       await login.initializationDone; // Wait for the initialization to complete
       final jsonMap = login.toJsonMap();
       final json = jsonEncode(jsonMap);
+      // ignore: avoid_print
       print('the json: $json');
       final jsonMap2 = jsonDecode(json);
       final login2 = Login.fromJsonMap(jsonMap2);

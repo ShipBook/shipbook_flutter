@@ -103,7 +103,7 @@ class LogManager {
         final base = AppenderFactory.create(appender.type, appender.name, config);
         appenders[appender.name] = base;
       } catch (e) {
-        innerLog.e('Error creating appender: $appender.name');
+        InnerLog().e('Error creating appender: $appender.name');
       }
     }
 

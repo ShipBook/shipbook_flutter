@@ -10,8 +10,8 @@
 
 import 'dart:convert';
 // import '../event_emitter.dart';
-import 'package:shipbook_flutter/log_manager.dart';
-import 'package:shipbook_flutter/storage.dart';
+import '../log_manager.dart';
+import '../storage.dart';
 
 import '../models/user.dart';
 
@@ -64,7 +64,7 @@ class SessionManager {
   bool isInLoginRequest = false;
 
   Future<String?> login(String appId, String appKey) async {
-    var configString = await storage.getString('config');
+    var configString = Storage().getString('config');
     configString ??= defaultConfig;
     final config = ConfigResponse.fromJson(jsonDecode(configString));
     readConfig(config);
@@ -83,41 +83,45 @@ class SessionManager {
     token = null;
     try {
       var loginObjData = loginObj!.toJsonMap();
-      innerLog.d('loginObjData: $loginObjData');
+      InnerLog().d('loginObjData: $loginObjData');
 
-      var resp = await connectionClient.request('auth/loginSdk', loginObjData, HttpMethod.post);
-      innerLog.d('resp: $resp');
+      var resp = await ConnectionClient.request('auth/loginSdk', loginObjData, HttpMethod.post);
+      InnerLog().d('resp: $resp');
       isInLoginRequest = false;
 
       if (resp.statusCode >= 200 && resp.statusCode < 300) {
         var json = jsonDecode(resp.body);
-        innerLog.i('Succeeded!: $json');
+        InnerLog().i('Succeeded!: $json');
         token = json['token'];
 
         readConfig(ConfigResponse.fromJson(json['config']));
 
         // eventEmitter.emit(CONNECTED);
-        storage.setString('config', jsonEncode(json['config']));
+        Storage().setString('config', jsonEncode(json['config']));
 
         return json['sessionUrl'];
       } else {
-        innerLog.e('didn\'t succeed to log');
+        InnerLog().e('didn\'t succeed to log');
         var text = resp.body;
         if (text.isNotEmpty) {
-          innerLog.e('the info that was received: $text');
+          InnerLog().e('the info that was received: $text');
         }
         return null;
       }
     } catch (e) {
-      innerLog.e('there was an error with the request: $e');
+      InnerLog().e('there was an error with the request: $e');
     }
     return null;
   }
 
   void readConfig(ConfigResponse config) {
-    if (!config.exceptionReportDisabled)  print('exception enabled');//exceptionManager.start();
-    if (!config.eventLoggingDisabled) print('event loggint enabled');//eventManager.enableAppState();
-    else print('event logging disabled'); //eventManager.removeAppState();
+    if (!config.exceptionReportDisabled)  InnerLog().i('exception enabled');//exceptionManager.start();
+    if (!config.eventLoggingDisabled) {
+      InnerLog().i('event loggint enabled');//eventManager.enableAppState();
+    }
+    else {
+      InnerLog().i('event logging disabled'); //eventManager.removeAppState();
+    }
 
     LogManager().config(config);
   }
@@ -140,7 +144,7 @@ class SessionManager {
       "appKey": loginObj!.appKey,
     };
     token = null;
-    var resp = await connectionClient.request("auth/refreshSdkToken", refresh, HttpMethod.post);
+    var resp = await ConnectionClient.request("auth/refreshSdkToken", refresh, HttpMethod.post);
     if (resp.statusCode >= 200 && resp.statusCode < 300) {
       var json = jsonDecode(resp.body);
       token = json['token'];

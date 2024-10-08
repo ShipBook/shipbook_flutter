@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
-import 'package:shipbook_flutter/models/response/config_response.dart';
 
 import './session_manager.dart';
 
@@ -11,7 +8,7 @@ enum HttpMethod { get, post, put, delete }
 class ConnectionClient {
   static const BASE_URL = "https://api.shipbook.io/v1/";
 
-  Future<Response> request(String url, [JsonMap? body, HttpMethod method = HttpMethod.get]) async {
+  static Future<Response> request(String url, [Object? body, HttpMethod method = HttpMethod.get]) async {
     Response resp;
     final uri = Uri.parse(BASE_URL + url);
     final headers = {
@@ -21,15 +18,22 @@ class ConnectionClient {
       headers['Authorization'] = 'Bearer ${sessionManager.token}';
     }
 
+
+    // String stringBody = '';
+    // if (body is String) {
+    //   stringBody = body;
+    // } else {
+    //   stringBody = jsonEncode(body);
+    // }
     switch (method) {
       case HttpMethod.get:
         resp = await http.get(uri, headers: headers);
         break;
       case HttpMethod.post:
-        resp = await http.post(uri, headers:headers, body: jsonEncode(body));
+        resp = await http.post(uri, headers:headers, body: body);
         break;
       case HttpMethod.put:
-        resp = await http.put(uri, headers:headers, body: jsonEncode(body));
+        resp = await http.put(uri, headers:headers, body: body);
         break;
       case HttpMethod.delete:
         resp = await http.delete(uri, headers:headers);
@@ -42,7 +46,8 @@ class ConnectionClient {
     }
     return resp;    
   }
+
+  static bool isOk(Response resp) {
+    return resp.statusCode >= 200 && resp.statusCode < 300;
+  }
 }
-
-
-final connectionClient = ConnectionClient();

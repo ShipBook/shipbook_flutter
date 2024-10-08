@@ -13,12 +13,11 @@ import 'log.dart';
 
 class Shipbook {
   static Future<String?> start(String appId, String appKey, [String? url]) async {
-    print ("Shipbook: start");
     return await sessionManager.login(appId, appKey);
   }
 
   static void enableInnerLog(bool enable) {
-    innerLog.enabled = enable;
+    InnerLog().enabled = enable;
   }
 
   static void setConnectionUrl(String url) {

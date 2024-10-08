@@ -11,7 +11,7 @@ class ConsoleAppender implements BaseAppender {
   final String name;
   final String? pattern;
   ConsoleAppender(this.name, JsonMap? config) : pattern = config?['pattern'] {
-    innerLog.i('ConsoleAppender pattern: $pattern');
+    InnerLog().i('ConsoleAppender pattern: $pattern');
   }
   
   @override
