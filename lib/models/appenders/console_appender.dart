@@ -1,21 +1,21 @@
-import 'package:shipbook_flutter/inner_log.dart';
+import '../../inner_log.dart';
 
 import '../base_log.dart';
+import '../common_types.dart';
 import '../message.dart';
 
-import '../response/config_response.dart';
 import 'base_appender.dart';
 
 class ConsoleAppender implements BaseAppender {
   @override
   final String name;
   final String? pattern;
-  ConsoleAppender(this.name, JsonMap? config) : pattern = config?['pattern'] {
+  ConsoleAppender(this.name, Json? config) : pattern = config?['pattern'] {
     InnerLog().i('ConsoleAppender pattern: $pattern');
   }
   
   @override
-  void update(JsonMap? config) {
+  void update(Json? config) {
     // Do nothing
   }
 

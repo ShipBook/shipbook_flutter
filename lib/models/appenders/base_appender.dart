@@ -1,10 +1,9 @@
-import 'package:shipbook_flutter/models/response/config_response.dart';
-
 import '../base_log.dart';
+import '../common_types.dart';
 
 abstract class BaseAppender {
   String get name;
-  void update(JsonMap config);
+  void update(Json config);
   void push(BaseLog log);
   void flush();
   void destructor();

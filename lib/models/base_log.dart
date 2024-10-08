@@ -1,3 +1,7 @@
+import 'common_types.dart';
+
+import 'message.dart';
+
 enum LogType {
   message, 
   exception,
@@ -16,7 +20,7 @@ class BaseLog {
     orderId = ++BaseLog.count;
   }
 
-  Map<String, dynamic> toJsonMap() {
+  Json toJson() {
     return {
       'time': time.toIso8601String(),
       'orderId': orderId,
@@ -24,12 +28,13 @@ class BaseLog {
     };
   }
 
-  factory BaseLog.fromJsonMap(Map<String, dynamic> json) {
-    return BaseLog(
-      LogType.values.firstWhere((e) => e.toString().split('.').last == json['type']),
-    )
-    ..time = DateTime.parse(json['time'])
-    ..orderId = json['orderId'];    
+  factory BaseLog.fromJson(Json json) {
+    switch (json['logType']) {
+      case 'message':
+        return Message.fromJson(json);
+      // Add cases for other subclasses here
+      default:
+        throw Exception('Unknown log type');
+    }
   }
 }
-

@@ -1,10 +1,10 @@
+import '../common_types.dart';
 import 'base_appender.dart';
 import 'console_appender.dart';
 import 'sbcloud_appender.dart';
-import '../response/config_response.dart';
 
 class AppenderFactory {
-  static BaseAppender create(String type, String name, JsonMap config) {
+  static BaseAppender create(String type, String name, Json config) {
     switch (type) {
       case 'ConsoleAppender':
         return ConsoleAppender(name, config);

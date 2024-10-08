@@ -8,8 +8,8 @@ import 'package:shipbook_flutter/networking/session_manager.dart';
 import 'package:shipbook_flutter/storage.dart';
 
 import '../../networking/connection_client.dart';
+import '../common_types.dart';
 import '../login.dart';
-import '../response/config_response.dart';
 
 import '../../inner_log.dart';
 import '../user.dart';
@@ -58,14 +58,14 @@ class SBCloudAppender implements BaseAppender {
   static var started = false;
   @override
   final String name;
-  SBCloudAppender(this.name, JsonMap? config){
+  SBCloudAppender(this.name, Json? config){
     update(config);
     started = true;
     InnerLog().i('SBCloudAppender created');
   }  
 
   @override
-  void update(JsonMap? config) {
+  void update(Json? config) {
     maxTime = config?['maxTime'] ?? maxTime;
     flushSeverity = config?['flushSeverity'] ? stringToSeverity(config!['flushSeverity']) : flushSeverity;
     flushSize = config?['flushSize'] ?? flushSize;
@@ -146,7 +146,7 @@ class SBCloudAppender implements BaseAppender {
       } else if (data.type == DataType.user.toString()) {
         sessionData.add(SessionData(user: data.data));
       } else { // it is a log
-        sessionData.add(SessionData(logs: [BaseLog.fromJsonMap(data.data)]));
+        sessionData.add(SessionData(logs: [BaseLog.fromJson(data.data)]));
       }
     }
     return sessionData;
@@ -169,15 +169,15 @@ class SBCloudAppender implements BaseAppender {
       final token = SessionManager().token;
       if (token != null) storageData.add(StorageData(type: DataType.token.toString(), data: token));
       final login = SessionManager().loginObj;
-      if (login != null) storageData.add(StorageData(type: DataType.login.toString(), data: login.toJsonMap()));
+      if (login != null) storageData.add(StorageData(type: DataType.login.toString(), data: login.toJson()));
     }
 
     if (data is List<BaseLog>) {
       for (var log in data) {
-        storageData.add(StorageData(type: log.type.toString(), data: log.toJsonMap()));
+        storageData.add(StorageData(type: log.type.toString(), data: log.toJson()));
       }
     } else if (data is User) {
-      storageData.add(StorageData(type: DataType.user.toString(), data: data.toJsonMap()));
+      storageData.add(StorageData(type: DataType.user.toString(), data: data.toJson()));
     } else {
       throw ArgumentError('Invalid data type. Expected List<BaseLog> or User.');
     }

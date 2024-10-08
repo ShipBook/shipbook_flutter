@@ -11,6 +11,7 @@
 import 'dart:convert';
 // import '../event_emitter.dart';
 import '../log_manager.dart';
+import '../models/common_types.dart';
 import '../storage.dart';
 
 import '../models/user.dart';
@@ -82,7 +83,7 @@ class SessionManager {
     isInLoginRequest = true;
     token = null;
     try {
-      var loginObjData = loginObj!.toJsonMap();
+      var loginObjData = loginObj!.toJson();
       InnerLog().d('loginObjData: $loginObjData');
 
       var resp = await ConnectionClient.request('auth/loginSdk', loginObjData, HttpMethod.post);
@@ -133,7 +134,7 @@ class SessionManager {
     innerLogin();
   }
 
-  void registerUser(String userId,  {String? userName, String? fullName, String? email, String? phoneNumber, JsonMap? additionalInfo}) {
+  void registerUser(String userId,  {String? userName, String? fullName, String? email, String? phoneNumber, Json? additionalInfo}) {
     user = User(userId:userId, userName: userName, fullName: fullName, email: email, phoneNumber: phoneNumber, additionalInfo: additionalInfo);
     // if (_loginObj != null) eventEmitter.emit(USER_CHANGE);
   }

@@ -1,4 +1,5 @@
-import 'package:shipbook_flutter/inner_log.dart';
+import '../inner_log.dart';
+import 'common_types.dart';
 
 import 'severity.dart';
 
@@ -14,7 +15,7 @@ class Message extends BaseLog {
   String? function;
   String? fileName;
   int? lineNumber;
-  
+
   Message(this.message, 
           this.severity,
           this.tag,
@@ -36,6 +37,20 @@ class Message extends BaseLog {
         InnerLog().d('Function: $function FileName: $fileName LineNumber: $lineNumber');
       } 
     }
+  }
+
+  @override
+  factory Message.fromJson(Json json) {
+    return Message(
+      json['message'],
+      json['severity'],
+      json['tag'],
+      json['stackTrace'],
+      json['error'],
+      json['function'],
+      json['fileName'],
+      json['lineNumber'],
+    );
   }
 
 

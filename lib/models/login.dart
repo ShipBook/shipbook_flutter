@@ -3,8 +3,8 @@ import 'dart:async';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'response/config_response.dart';
 
+import 'common_types.dart';
 import 'user.dart';
 
 class Login {
@@ -60,7 +60,7 @@ class Login {
     appBuild = packageInfo.buildNumber;
   }
 
-  JsonMap toJsonMap() {
+  Json toJson() {
     return {
       'appId': appId,
       'appKey': appKey,
@@ -79,12 +79,12 @@ class Login {
       'deviceName': deviceName,
       'deviceModel': deviceModel,
       'language': language,
-      'user': user?.toJsonMap(),
+      'user': user?.toJson(),
     };
   }
 
     // Create a Login object from a JSON map
-  factory Login.fromJsonMap(JsonMap jsonMap) {
+  factory Login.fromJson(Json jsonMap) {
     return Login(
       jsonMap['appId'],
       jsonMap['appKey'],
@@ -104,7 +104,7 @@ class Login {
       ..deviceName = jsonMap['deviceName']
       ..deviceModel = jsonMap['deviceModel']
       ..language = jsonMap['language']
-      ..user = User.fromJsonMap(jsonMap['user']);
+      ..user = User.fromJson(jsonMap['user']);
   }
 
   Future<void> get initializationDone => _initializationCompleter.future;
