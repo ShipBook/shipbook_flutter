@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shipbook_flutter/models/common_types.dart';
+
+
 
 class Storage {
   static final Storage _instance = Storage._internal();
@@ -78,23 +81,40 @@ class Storage {
   }
 
   // Add an object to a list of objects
-  void addList(String key, dynamic value) {
+  void addList(String key, JsonEncodable value) {
     List<dynamic>? currentList = getList(key);
     currentList ??= [];
-    currentList.add(value);
+    currentList.add(value.toJson());
     setList(key, currentList);
   }
 
-  void addAllList(String key, List<dynamic> value) {
+  void addAllList(String key, List<JsonEncodable> value) {
     List<dynamic>? currentList = getList(key);
     currentList ??= [];
-    currentList.addAll(value);
+    currentList.addAll(value.map((item) => item.toJson()));
     setList(key, currentList);
+  }
+
+  dynamic _decodeIfJsonString(String jsonString) {
+    try {
+      final decoded = jsonDecode(jsonString);
+      // If jsonDecode succeeds, return the decoded value
+      return decoded;
+    } catch (e) {
+      // If jsonDecode fails, return the original string
+      return jsonString;
+    }
   }
 
   // Save a list of objects
   void setList(String key, List value) {
-    List<String> jsonStringList = value.map((item) => jsonEncode(item)).toList();
+    List<String> jsonStringList = value.map((item) {
+      if (item is String) {
+        return item;
+      } else {
+        return jsonEncode(item);
+      }
+    }).toList();
     _prefs.setStringList(key, jsonStringList);
   }
 
@@ -103,7 +123,7 @@ class Storage {
     List<String>? jsonStringList = _prefs.getStringList(key);
     if (jsonStringList == null) return null;
 
-    return jsonStringList.map((jsonString) => jsonDecode(jsonString)).toList();
+    return jsonStringList.map((jsonString) => _decodeIfJsonString(jsonString)).toList();
   }
 
   void remove(String key) {

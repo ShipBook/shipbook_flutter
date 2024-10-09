@@ -19,23 +19,34 @@ import 'base_appender.dart';
 enum DataType {
   token,
   login,
-  user
+  user,
+  log
 }
 
-class StorageData {
-  final String type;
+class StorageData implements JsonEncodable {
+  final DataType type;
   final dynamic data;
 
   StorageData({required this.type, required this.data});
+
+  @override
+  Json toJson() {
+    return {
+      'type': type.name,
+      'data': data,
+    };
+  }
 }
 
 class SessionData {
   String? token;
   Login? login;
-  List<BaseLog>? logs;
+  List<BaseLog> logs = [];
   User? user;
 
-  SessionData({this.token, this.login, this.logs, this.user});
+  SessionData({this.token, this.login, this.user, List<BaseLog>? logs}) {
+    if (logs != null) this.logs = logs;
+  }
 }
 
 
@@ -134,22 +145,41 @@ class SBCloudAppender implements BaseAppender {
   List<SessionData> loadSessionData() { // should be private but for testing it is public
     InnerLog().d('entered load session data');
     final storageData = Storage().getList(SESSION_DATA);
-    if (storageData == null) return [];
+    if (storageData == null || storageData.isEmpty) return [];
 
-    final List<SessionData> sessionData = [];
+    final List<SessionData> sessionsData = [];
+    SessionData? sessionData;
+    InnerLog().d('dataType values: ${DataType.values}');
     for (var data in storageData) {
-      if (data.type == DataType.token.toString()) {
-
-        sessionData.add(SessionData(token: data.data));
-      } else if (data.type == DataType.login.toString()) {
-        sessionData.add(SessionData(login: data.data));
-      } else if (data.type == DataType.user.toString()) {
-        sessionData.add(SessionData(user: data.data));
-      } else { // it is a log
-        sessionData.add(SessionData(logs: [BaseLog.fromJson(data.data)]));
+      // DataType type = DataType.values.firstWhere((e) => e.toString().split('.').last == data['type']);
+      DataType type = DataType.values.byName(data['type']);
+      switch(type) {
+        case DataType.token:
+          if (sessionData != null) sessionsData.add(sessionData);
+          sessionData = SessionData(token: data['data']);
+          break;
+        case DataType.login:
+          if (sessionData != null) sessionsData.add(sessionData);
+          sessionData = SessionData(login: Login.fromJson(data['data']));
+          break;
+        case DataType.user:
+          sessionData!.user = User.fromJson(data['data']);
+          InnerLog().d('user: ${sessionData.user}');
+          break;
+        case DataType.log: 
+          if (sessionData == null) {
+            InnerLog().e('session data is null $storageData');
+          } else {
+            final logs = BaseLog.fromJson(data['data']);
+            sessionData.logs.add(logs);
+          }
+          break;
       }
     }
-    return sessionData;
+
+    if (sessionData != null) sessionsData.add(sessionData);
+
+    return sessionsData;
   }
 
 
@@ -157,7 +187,7 @@ class SBCloudAppender implements BaseAppender {
     InnerLog().d('entered save to storage');
 
     // first delete all if there are more than maxLogSize
-    var storageData = Storage().getList(SESSION_DATA);
+    var storageData = Storage().getList(SESSION_DATA) as List<StorageData>?;
     storageData ??= [];
     if (storageData.length > maxLogSize) {
       Storage().remove(SESSION_DATA);
@@ -167,18 +197,17 @@ class SBCloudAppender implements BaseAppender {
     if (!hasLog) {
       hasLog = true;
       final token = SessionManager().token;
-      if (token != null) storageData.add(StorageData(type: DataType.token.toString(), data: token));
+      if (token != null) storageData.add(StorageData(type: DataType.token, data: token));
       final login = SessionManager().loginObj;
-      if (login != null) storageData.add(StorageData(type: DataType.login.toString(), data: login.toJson()));
+      if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()));
     }
 
-    if (data is BaseLog) {
-      // for (var log in data) {
-      final log = data;
-        storageData.add(StorageData(type: log.type.toString(), data: log.toJson()));
-      // }
+    if (data is List<BaseLog>) {
+      for (var log in data) {
+        storageData.add(StorageData(type: DataType.log, data: log.toJson()));
+      }
     } else if (data is User) {
-      storageData.add(StorageData(type: DataType.user.toString(), data: data.toJson()));
+      storageData.add(StorageData(type: DataType.user, data: data.toJson()));
     } else {
       throw ArgumentError('Invalid data type. Expected List<BaseLog> or User.');
     }

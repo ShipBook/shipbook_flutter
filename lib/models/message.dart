@@ -44,7 +44,7 @@ class Message extends BaseLog {
   factory Message.fromJson(Json json) {
     return Message(
       json['message'],
-      json['severity'],
+      Severity.values.byName(json['severity']),
       json['tag'],
       json['stackTrace'],
       json['error'],
@@ -56,14 +56,21 @@ class Message extends BaseLog {
   }
 
 
-  // @override
-  // Map<String, dynamic> toJson() {
-  //   final json = super.toJson();
-  //   json['tag'] = tag;
-  //   json['message'] = message;
-  //   if (stackTrace != null) json['stackTrace'] = stackTrace;
-  //   if (exception != null) json['exception'] = exception;
-  //   if (exceptionType != null) json['exceptionType'] = exceptionType;
-  //   return json;
-  // }
+  @override
+  Map<String, dynamic> toJson() {
+    final json = super.toJson();
+    json['tag'] = tag;
+    json['message'] = message;
+    json['severity'] = severity.name;
+    json['function'] = function;
+    json['fileName'] = fileName;
+    json['lineNumber'] = lineNumber;
+    
+    if (stackTrace != null) json['stackTrace'] = stackTrace;
+    if (error != null) json['error'] = error;
+
+    // if (exception != null) json['exception'] = exception;
+    // if (exceptionType != null) json['exceptionType'] = exceptionType;
+    return json;
+  }
 }

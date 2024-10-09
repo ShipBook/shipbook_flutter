@@ -29,12 +29,12 @@ class BaseLog {
     return {
       'time': time.toIso8601String(),
       'orderId': orderId,
-      'type': type.toString().split('.').last
+      'type': type.name,
     };
   }
 
   factory BaseLog.fromJson(Json json) {
-    switch (json['logType']) {
+    switch (json['type']) {
       case 'message':
         return Message.fromJson(json);
       // Add cases for other subclasses here

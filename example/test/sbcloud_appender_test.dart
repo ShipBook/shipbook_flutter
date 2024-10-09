@@ -25,7 +25,6 @@ void main() async {
     });
 
     test('SBCloudAppender initialization', () async {
-      await Storage().initialized;
       expect(cloudAppender, isA<SBCloudAppender>());
       expect(cloudAppender.name, 'testAppender');
       expect(cloudAppender.maxTime, 4);
@@ -41,9 +40,7 @@ void main() async {
       logs.add(Message('message 4', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 4));
       logs.add(Message('message 5', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 5));
 
-      for (var log in logs) {
-        cloudAppender.saveToStorage(log);
-      }
+      cloudAppender.saveToStorage(logs);
 
       final sessionsData = cloudAppender.loadSessionData();
       expect(sessionsData.length, 1);
@@ -51,9 +48,9 @@ void main() async {
       expect(sessionData.token, token);
       expect(sessionData.login, isNull);
       expect(sessionData.user, isNull);
-      expect(sessionData.logs!.length, 5);
+      expect(sessionData.logs.length, 5);
       for (var i = 0; i < logs.length; i++) {
-        expect(sessionData.logs![i].toJson(), logs[i].toJson());
+        expect(sessionData.logs[i].toJson(), logs[i].toJson());
       }
     });
 
