@@ -1,6 +1,4 @@
 
-
-import 'models/appenders/appender_factory.dart';
 import 'models/message.dart';
 import 'models/response/config_response.dart';
 import 'models/appenders/base_appender.dart';
@@ -100,7 +98,7 @@ class LogManager {
     for (final appender in config.appenders) {
       try {
         final config = appender.config ?? {};
-        final base = AppenderFactory.create(appender.type, appender.name, config);
+        final base = BaseAppender.create(appender.type, appender.name, config);
         appenders[appender.name] = base;
       } catch (e) {
         InnerLog().e('Error creating appender: $appender.name');

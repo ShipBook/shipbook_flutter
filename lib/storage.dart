@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,20 +6,28 @@ class Storage {
   static final Storage _instance = Storage._internal();
   factory Storage() => _instance;
   
-  late SharedPreferencesWithCache _prefs;
+  // late SharedPreferencesWithCache _prefs;
+
+  late SharedPreferences _prefs;
+  final Completer<void> _completer = Completer<void>();
 
   Storage._internal() {
     _init();
   }
 
   Future<void> _init() async {
-    _prefs =  await SharedPreferencesWithCache.create(
-      cacheOptions: const SharedPreferencesWithCacheOptions(
-        // When an allowlist is included, any keys that aren't included cannot be used.
-        allowList: <String>{'repeat', 'action'},
-      )
-    );
+    // _prefs =  await SharedPreferencesWithCache.create(
+    //   cacheOptions: const SharedPreferencesWithCacheOptions(
+    //     // When an allowlist is included, any keys that aren't included cannot be used.
+    //     allowList: <String>{'repeat', 'action'},
+    //   )
+    // );
+
+    _prefs = await SharedPreferences.getInstance();
+    _completer.complete();
   }
+
+  Future<void> get initialized => _completer.future;
 
   // Save a string value
   void setString(String key, String value) {

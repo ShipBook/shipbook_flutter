@@ -23,7 +23,8 @@ class Message extends BaseLog {
           this.error,
           this.function,
           this.fileName,
-          this.lineNumber) : super(LogType.message) {
+          this.lineNumber,
+          [Json? json]) : super(LogType.message, json) {
     if (fileName == null) {
       final stackTrace = StackTrace.current.toString();
       final line = stackTrace.split('\n')[3];
@@ -50,6 +51,7 @@ class Message extends BaseLog {
       json['function'],
       json['fileName'],
       json['lineNumber'],
+      json
     );
   }
 

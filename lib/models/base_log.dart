@@ -15,9 +15,14 @@ class BaseLog {
   late int orderId;
   late LogType type;
 
-  BaseLog(this.type) {
-    time = DateTime.now();
-    orderId = ++BaseLog.count;
+  BaseLog(this.type, [Json? json]) {
+    if (json != null) {
+      time = DateTime.parse(json['time']);
+      orderId = json['orderId'];
+    } else {
+      time = DateTime.now();
+      orderId = ++BaseLog.count;
+    }
   }
 
   Json toJson() {

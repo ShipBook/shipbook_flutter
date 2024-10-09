@@ -67,7 +67,7 @@ class SBCloudAppender implements BaseAppender {
   @override
   void update(Json? config) {
     maxTime = config?['maxTime'] ?? maxTime;
-    flushSeverity = config?['flushSeverity'] ? stringToSeverity(config!['flushSeverity']) : flushSeverity;
+    flushSeverity = (config?['flushSeverity'] != null) ? stringToSeverity(config!['flushSeverity']) : flushSeverity;
     flushSize = config?['flushSize'] ?? flushSize;
   }
 
@@ -114,9 +114,9 @@ class SBCloudAppender implements BaseAppender {
       timer = null;
     }
 
-    if (sessionManager.token != null) return; 
+    if (SessionManager().token != null) return; 
 
-    final sessionsData = _loadSessionData();
+    final sessionsData = loadSessionData();
 
     if (sessionsData.isEmpty) return;
 
@@ -131,7 +131,7 @@ class SBCloudAppender implements BaseAppender {
     }
   }
 
-  List<SessionData> _loadSessionData() {
+  List<SessionData> loadSessionData() { // should be private but for testing it is public
     InnerLog().d('entered load session data');
     final storageData = Storage().getList(SESSION_DATA);
     if (storageData == null) return [];
@@ -172,10 +172,11 @@ class SBCloudAppender implements BaseAppender {
       if (login != null) storageData.add(StorageData(type: DataType.login.toString(), data: login.toJson()));
     }
 
-    if (data is List<BaseLog>) {
-      for (var log in data) {
+    if (data is BaseLog) {
+      // for (var log in data) {
+      final log = data;
         storageData.add(StorageData(type: log.type.toString(), data: log.toJson()));
-      }
+      // }
     } else if (data is User) {
       storageData.add(StorageData(type: DataType.user.toString(), data: data.toJson()));
     } else {

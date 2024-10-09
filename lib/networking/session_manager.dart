@@ -1,13 +1,3 @@
-// import 'package:your_package/event_emitter.dart';
-// import 'package:your_package/event_manager.dart';
-// import 'package:your_package/exception_manager.dart';
-// import 'package:your_package/inner_log.dart';
-// import 'package:your_package/log_manager.dart';
-// import 'package:your_package/models/login.dart';
-// import 'package:your_package/models/user.dart';
-// import 'package:your_package/storage.dart';
-// import 'package:your_package/connection_client.dart';
-
 import 'dart:convert';
 // import '../event_emitter.dart';
 import '../log_manager.dart';
@@ -46,6 +36,11 @@ const defaultConfig =
 ;
 
 class SessionManager {
+
+  static final SessionManager _instance = SessionManager._internal();
+  factory SessionManager() => _instance;
+  SessionManager._internal();
+
   String? token;
   Login? _loginObj;
 
@@ -159,6 +154,4 @@ class SessionManager {
     return loginObj?.udid;
   }
 }
-
-final sessionManager = SessionManager();
 

@@ -14,8 +14,8 @@ class ConnectionClient {
     final headers = {
       'Content-Type': 'application/json',
     };
-    if (sessionManager.token != null) {
-      headers['Authorization'] = 'Bearer ${sessionManager.token}';
+    if (SessionManager().token != null) {
+      headers['Authorization'] = 'Bearer ${SessionManager().token}';
     }
 
 
@@ -41,7 +41,7 @@ class ConnectionClient {
     }
 
     if (resp.statusCode == 401 && resp.reasonPhrase == 'TokenExpired') { // call refresh token
-      if (! await sessionManager.refreshToken())  return resp;
+      if (! await SessionManager().refreshToken())  return resp;
       resp = await request(url, body, method);
     }
     return resp;    
