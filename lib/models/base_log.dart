@@ -27,7 +27,7 @@ class BaseLog {
 
   Json toJson() {
     return {
-      'time': time.toIso8601String(),
+      'time': time.toUtc().toIso8601String(),
       'orderId': orderId,
       'type': type.name,
     };

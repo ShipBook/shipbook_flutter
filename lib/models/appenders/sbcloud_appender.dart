@@ -38,7 +38,7 @@ class StorageData implements JsonEncodable {
   }
 }
 
-class SessionData {
+class SessionData implements JsonEncodable {
   String? token;
   Login? login;
   List<BaseLog> logs = [];
@@ -46,6 +46,16 @@ class SessionData {
 
   SessionData({this.token, this.login, this.user, List<BaseLog>? logs}) {
     if (logs != null) this.logs = logs;
+  }
+
+  @override
+  Json toJson() {
+    final json = <String, dynamic>{};
+    if (token != null) json['token'] = token;
+    if (login != null) json['login'] = login!.toJson();
+    if (user != null) json['user'] = user!.toJson();
+    json['logs'] = logs.map((e) => e.toJson()).toList();
+    return json;
   }
 }
 
@@ -85,13 +95,9 @@ class SBCloudAppender implements BaseAppender {
   @override
   Future<void> push(log) async {    
     if (log.type == LogType.message) {
-      final message = log as Message;
-      if (message.severity.index >= flushSeverity.index) {
-        flushQueue.add(message);
-        if (flushQueue.length >= flushSize) {
-          flush();
-        }
-      }
+      await pushMessage(log as Message);
+    } else {
+      InnerLog().e('Invalid log type: ${log.type}');
     }
   }
 
@@ -125,13 +131,14 @@ class SBCloudAppender implements BaseAppender {
       timer = null;
     }
 
-    if (SessionManager().token != null) return; 
+    if (SessionManager().token == null) return; 
 
     final sessionsData = loadSessionData();
 
     if (sessionsData.isEmpty) return;
 
-    final data = jsonEncode(sessionsData);
+    final json = sessionsData.map((e) => e.toJson()).toList();
+    final data = jsonEncode(json);
 
     final resp = await ConnectionClient.request('sessions/uploadSavedData', data, HttpMethod.post);
     if (ConnectionClient.isOk(resp)) {
@@ -145,6 +152,7 @@ class SBCloudAppender implements BaseAppender {
   List<SessionData> loadSessionData() { // should be private but for testing it is public
     InnerLog().d('entered load session data');
     final storageData = Storage().getList(SESSION_DATA);
+    Storage().remove(SESSION_DATA);
     if (storageData == null || storageData.isEmpty) return [];
 
     final List<SessionData> sessionsData = [];
@@ -187,7 +195,12 @@ class SBCloudAppender implements BaseAppender {
     InnerLog().d('entered save to storage');
 
     // first delete all if there are more than maxLogSize
-    var storageData = Storage().getList(SESSION_DATA) as List<StorageData>?;
+    var storageData = Storage().getList(SESSION_DATA) as List<Json>?;
+    if (storageData != null && storageData.length > maxLogSize) {
+      Storage().remove(SESSION_DATA);
+      storageData = [];
+    }
+    
     storageData ??= [];
     if (storageData.length > maxLogSize) {
       Storage().remove(SESSION_DATA);
@@ -197,17 +210,17 @@ class SBCloudAppender implements BaseAppender {
     if (!hasLog) {
       hasLog = true;
       final token = SessionManager().token;
-      if (token != null) storageData.add(StorageData(type: DataType.token, data: token));
+      if (token != null) storageData.add(StorageData(type: DataType.token, data: token).toJson());
       final login = SessionManager().loginObj;
-      if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()));
+      if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()).toJson());
     }
 
     if (data is List<BaseLog>) {
       for (var log in data) {
-        storageData.add(StorageData(type: DataType.log, data: log.toJson()));
+        storageData.add(StorageData(type: DataType.log, data: log.toJson()).toJson());
       }
     } else if (data is User) {
-      storageData.add(StorageData(type: DataType.user, data: data.toJson()));
+      storageData.add(StorageData(type: DataType.user, data: data.toJson()).toJson());
     } else {
       throw ArgumentError('Invalid data type. Expected List<BaseLog> or User.');
     }
@@ -221,6 +234,8 @@ class SBCloudAppender implements BaseAppender {
       send();
       timer = null;
     });
+
+    InnerLog().i('Timer created');
   }
 
   @override

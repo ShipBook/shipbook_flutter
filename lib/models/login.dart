@@ -67,8 +67,8 @@ class Login {
       'bundelIdentifier': bundelIdentifier,
       'appName': appName,
       'udid': udid,
-      'time': time.toIso8601String(),
-      'deviceTime': deviceTime.toIso8601String(),
+      'time': time.toUtc().toIso8601String(),
+      'deviceTime': deviceTime.toUtc().toIso8601String(),
       'os': os,
       'platform': platform,
       'osVersion': osVersion,
@@ -104,7 +104,7 @@ class Login {
       ..deviceName = jsonMap['deviceName']
       ..deviceModel = jsonMap['deviceModel']
       ..language = jsonMap['language']
-      ..user = User.fromJson(jsonMap['user']);
+      ..user = jsonMap['user'] != null ? User.fromJson(jsonMap['user']) : null;
   }
 
   Future<void> get initializationDone => _initializationCompleter.future;

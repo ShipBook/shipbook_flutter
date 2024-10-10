@@ -88,10 +88,10 @@ class Storage {
     setList(key, currentList);
   }
 
-  void addAllList(String key, List<JsonEncodable> value) {
+  void addAllList(String key, List<Json> value) {
     List<dynamic>? currentList = getList(key);
     currentList ??= [];
-    currentList.addAll(value.map((item) => item.toJson()));
+    currentList.addAll(value);
     setList(key, currentList);
   }
 
@@ -119,11 +119,11 @@ class Storage {
   }
 
   // Retrieve a list of objects
-  List<dynamic>? getList(String key) {
+  List<Json>? getList(String key) {
     List<String>? jsonStringList = _prefs.getStringList(key);
     if (jsonStringList == null) return null;
 
-    return jsonStringList.map((jsonString) => _decodeIfJsonString(jsonString)).toList();
+    return jsonStringList.map<Json>((jsonString) => _decodeIfJsonString(jsonString)).toList();
   }
 
   void remove(String key) {

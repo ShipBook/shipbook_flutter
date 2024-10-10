@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:shipbook_flutter/shipbook_flutter.dart';
 
 void main() {
+
   runApp(const MyApp());
+  Shipbook.enableInnerLog(true);
+  Shipbook.start("64bea27426fa5e22a43b02ec", "10f193043b53eb916239e1ab08c8b4c7");
 }
 
 final log = Shipbook.getLogger("main");
@@ -13,8 +16,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    Shipbook.enableInnerLog(true);
-    Shipbook.start("64bea27426fa5e22a43b02ec", "10f193043b53eb916239e1ab08c8b4c7");
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -64,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _incrementCounter() {
 
-    log.i('Incrementing counter');
+    log.i('Incrementing counter $_counter');
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -72,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+      log.d('Counter incremented to $_counter');
     });
   }
 

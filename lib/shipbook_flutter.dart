@@ -1,5 +1,7 @@
 library shipbook_flutter;
 
+import 'storage.dart';
+
 import 'models/common_types.dart';
 import '../networking/session_manager.dart';
 
@@ -12,6 +14,7 @@ import 'log.dart';
 
 class Shipbook {
   static Future<String?> start(String appId, String appKey, [String? url]) async {
+    await Storage().initialized;
     return await SessionManager().login(appId, appKey);
   }
 

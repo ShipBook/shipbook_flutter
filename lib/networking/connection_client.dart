@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
@@ -19,21 +21,21 @@ class ConnectionClient {
     }
 
 
-    // String stringBody = '';
-    // if (body is String) {
-    //   stringBody = body;
-    // } else {
-    //   stringBody = jsonEncode(body);
-    // }
+    String? stringBody ;
+    if (body is String ) {
+      stringBody = body;
+    } else if (body != null) {
+      stringBody = jsonEncode(body);
+    }
     switch (method) {
       case HttpMethod.get:
         resp = await http.get(uri, headers: headers);
         break;
       case HttpMethod.post:
-        resp = await http.post(uri, headers:headers, body: body);
+        resp = await http.post(uri, headers:headers, body: stringBody);
         break;
       case HttpMethod.put:
-        resp = await http.put(uri, headers:headers, body: body);
+        resp = await http.put(uri, headers:headers, body: stringBody);
         break;
       case HttpMethod.delete:
         resp = await http.delete(uri, headers:headers);
