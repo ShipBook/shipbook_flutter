@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:shipbook_flutter/event_emitter.dart';
 import 'package:shipbook_flutter/models/base_log.dart';
 import 'package:shipbook_flutter/models/message.dart';
 import 'package:shipbook_flutter/models/severity.dart';
@@ -82,8 +83,23 @@ class SBCloudAppender implements BaseAppender {
   SBCloudAppender(this.name, Json? config){
     update(config);
     started = true;
+    
+    // add event listener for user change
+    EventEmitter().on(EventType.userChange).listen(_userChangeController);
+
     InnerLog().i('SBCloudAppender created');
   }  
+
+  void dispose() {
+    EventEmitter().off(EventType.userChange, _userChangeController);
+  }
+
+  void _userChangeController(dynamic data) {
+    InnerLog().d('user change event');
+    if (data is User) { 
+      saveToStorage(data);
+    }
+  }
 
   @override
   void update(Json? config) {

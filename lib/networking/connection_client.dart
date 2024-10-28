@@ -8,7 +8,8 @@ import './session_manager.dart';
 enum HttpMethod { get, post, put, delete }
 
 class ConnectionClient {
-  static const BASE_URL = "https://api.shipbook.io/v1/";
+  // ignore: non_constant_identifier_names
+  static var BASE_URL = "https://api.shipbook.io/v1/";
 
   static Future<Response> request(String url, [Object? body, HttpMethod method = HttpMethod.get]) async {
     Response resp;

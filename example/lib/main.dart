@@ -8,6 +8,20 @@ void main() {
   Shipbook.start("64bea27426fa5e22a43b02ec", "10f193043b53eb916239e1ab08c8b4c7");
 }
 
+class RegisterButton extends StatelessWidget {
+  const RegisterButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Shipbook.registerUser("test1");
+        // log.i('User registered to Shipbook');
+      },
+      child: const Text('Register to Shipbook'),
+    );
+  }
+}
 final log = Shipbook.getLogger("main");
 
 class MyApp extends StatelessWidget {
@@ -115,6 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const RegisterButton(),
             const Text(
               'You have pushed the button this many times:',
             ),

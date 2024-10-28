@@ -1,5 +1,7 @@
 import 'dart:convert';
 // import '../event_emitter.dart';
+import 'package:shipbook_flutter/event_emitter.dart';
+
 import '../log_manager.dart';
 import '../models/common_types.dart';
 import '../storage.dart';
@@ -131,7 +133,7 @@ class SessionManager {
 
   void registerUser(String userId,  {String? userName, String? fullName, String? email, String? phoneNumber, Json? additionalInfo}) {
     user = User(userId:userId, userName: userName, fullName: fullName, email: email, phoneNumber: phoneNumber, additionalInfo: additionalInfo);
-    // if (_loginObj != null) eventEmitter.emit(USER_CHANGE);
+    if (_loginObj != null) EventEmitter().emit(EventType.userChange, user);
   }
 
   Future<bool> refreshToken() async {

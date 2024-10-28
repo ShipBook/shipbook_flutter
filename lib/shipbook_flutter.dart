@@ -1,5 +1,7 @@
 library shipbook_flutter;
 
+import 'package:shipbook_flutter/networking/connection_client.dart';
+
 import 'storage.dart';
 
 import 'models/common_types.dart';
@@ -23,11 +25,11 @@ class Shipbook {
   }
 
   static void setConnectionUrl(String url) {
-    // connectionClient.BASE_URL = url;
+    ConnectionClient.BASE_URL = url;
   }
 
   static void registerUser(String userId, {String? userName, String? fullName, String? email, String? phoneNumber, Json? additionalInfo}) {
-    // sessionManager.registerUser(userId, userName, fullName, email, phoneNumber, additionalInfo);
+    SessionManager().registerUser(userId, userName: userName, fullName: fullName, email: email, phoneNumber: phoneNumber, additionalInfo: additionalInfo);
   }
 
   static void logout() {
@@ -47,8 +49,7 @@ class Shipbook {
     // logManager.push(event);
   }
 
-  // static String getUUID() {
-    // return sessionManager.getUUID();
-  // }
+  static String? getUUID() {
+    return SessionManager().getUUID();
+  }
 }
-
