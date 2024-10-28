@@ -9,23 +9,30 @@ class InnerLog {
 
   InnerLog._internal();
 
+  String _message(String? message, [List<Object>? optionalParams]) {
+    String optionalParamsString = '';
+    if (optionalParams != null && optionalParams.isNotEmpty) {
+      optionalParamsString = optionalParams.join(' ');
+    }
+    return "Shipbook: $message $optionalParamsString";
+  }
   void e(String? message, [List<Object>? optionalParams]) {
     if (!enabled) return;
-    print("Shipbook: $message ${optionalParams?.join(' ')}");
+    print(_message(message, optionalParams));
   }
 
   void w(String? message, [List<Object>? optionalParams]) {
     if (!enabled) return;
-    print("Shipbook: $message ${optionalParams?.join(' ')}");
+    print(_message(message, optionalParams));
   }
 
   void i(String? message, [List<Object>? optionalParams]) {
     if (!enabled) return;
-    print("Shipbook: $message ${optionalParams?.join(' ')}");
+    print(_message(message, optionalParams));
   }
 
   void d(String? message, [List<Object>? optionalParams]) {
     if (!enabled) return;
-    print("Shipbook: $message ${optionalParams?.join(' ')}");
+    print(_message(message, optionalParams));
   }
 }

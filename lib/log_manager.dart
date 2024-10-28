@@ -29,7 +29,7 @@ class LogManager {
   final List<Logger> loggers = [];
 
   void clear() {
-    appenders.forEach((_, appender) => appender.destructor());  
+    appenders.forEach((_, appender) => appender.dispose());  
     appenders.clear();
     loggers.clear();
   }
@@ -37,7 +37,7 @@ class LogManager {
   void add(BaseAppender appender, String name) {
     final origAppender = appenders[name];
     if (origAppender != null) {
-      origAppender.destructor();
+      origAppender.dispose();
     }
     appenders[name] = appender;
   }
@@ -45,7 +45,7 @@ class LogManager {
   void remove(String name) {
     final appender = appenders[name];
     if (appender != null) {
-      appender.destructor();
+      appender.dispose();
       appenders.remove(name);
     }
   }

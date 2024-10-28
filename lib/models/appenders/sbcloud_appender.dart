@@ -90,6 +90,7 @@ class SBCloudAppender implements BaseAppender {
     InnerLog().i('SBCloudAppender created');
   }  
 
+  @override
   void dispose() {
     EventEmitter().off(EventType.userChange, _userChangeController);
   }
@@ -253,9 +254,5 @@ class SBCloudAppender implements BaseAppender {
 
     InnerLog().i('Timer created');
   }
-
-  @override
-  void destructor() {
-    // Do nothing
-  }
+  
 }

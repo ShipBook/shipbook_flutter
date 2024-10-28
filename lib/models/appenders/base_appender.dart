@@ -8,7 +8,7 @@ abstract class BaseAppender {
   void update(Json config);
   void push(BaseLog log);
   void flush();
-  void destructor();
+  void dispose();
 
   factory BaseAppender.create(String type, String name, Json? config) {
     switch (type) {

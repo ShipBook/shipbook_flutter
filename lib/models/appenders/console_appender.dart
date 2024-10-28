@@ -36,7 +36,7 @@ class ConsoleAppender implements BaseAppender {
   }
 
   @override
-  void destructor() {
+  void dispose() {
     // Do nothing
   }
 }
