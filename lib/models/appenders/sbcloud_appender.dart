@@ -211,20 +211,18 @@ class SBCloudAppender implements BaseAppender {
 
   void saveToStorage(dynamic data) { // should be private but for testing it is public
     InnerLog().d('entered save to storage');
+    final storageDataSize = Storage().getListSize(SESSION_DATA);
+
 
     // first delete all if there are more than maxLogSize
-    var storageData = Storage().getList(SESSION_DATA);
-    if (storageData != null && storageData.length > _maxLogSize) {
+    // var storageData = Storage().getList(SESSION_DATA);
+    if (storageDataSize > _maxLogSize) {
       Storage().remove(SESSION_DATA);
-      storageData = [];
-    }
     
-    storageData ??= [];
-    if (storageData.length > _maxLogSize) {
-      Storage().remove(SESSION_DATA);
-      storageData.clear();
     }
 
+    final storageData = <Json>[];
+    
     if (!_hasLog) {
       _hasLog = true;
       final token = SessionManager().token;

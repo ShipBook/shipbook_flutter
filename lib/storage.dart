@@ -126,6 +126,11 @@ class Storage {
     return jsonStringList.map<Json>((jsonString) => _decodeIfJsonString(jsonString)).toList();
   }
 
+  int getListSize(String key) {
+    List<String>? jsonStringList = _prefs.getStringList(key);
+    return jsonStringList?.length ?? 0;
+  }
+
   void remove(String key) {
     _prefs.remove(key);
   }
