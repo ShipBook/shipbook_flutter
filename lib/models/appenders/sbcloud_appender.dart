@@ -85,7 +85,7 @@ class SBCloudAppender implements BaseAppender {
     started = true;
     
     // add event listener for user change
-    EventEmitter().on(EventType.userChange).listen(_userChangeController);
+    EventEmitter().on(EventType.userChange, _userChangeController);
 
     InnerLog().i('SBCloudAppender created');
   }  
