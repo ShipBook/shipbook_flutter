@@ -58,10 +58,12 @@ class LogManager {
         if (message.tag!.startsWith(logger.key) && message.severity.index <= logger.severity.index) {
           appenderNames.add(logger.appender.name);
         }
-        for (final name in appenderNames) {
-          appenders[name]!.push(log);
-        }
       }
+      
+      for (final name in appenderNames) {
+        appenders[name]!.push(log);
+      }
+      
     } else {
       appenders.forEach((_, appender) => appender.push(log));
     }

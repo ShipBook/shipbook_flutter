@@ -66,13 +66,13 @@ class SessionData implements JsonEncodable {
 const SESSION_DATA = 'session_data';
 class SBCloudAppender implements BaseAppender {
   var maxTime = 4;
-  var flushSeverity = Severity.Verbose;
-  var flushSize = 1000;
-  var maxLogSize = 5000;
+  var _flushSeverity = Severity.Verbose;
+  var _flushSize = 1000;
+  final _maxLogSize = 5000;
 
   var flushQueue = <BaseLog>[];
   Timer? timer;
-  var hasLog = false;
+  var _hasLog = false;
   // appstatesubsicription
   // var appStateSubscription;
   // eventlistener
@@ -99,49 +99,50 @@ class SBCloudAppender implements BaseAppender {
     InnerLog().d('user change event');
     if (data is User) { 
       saveToStorage(data);
+      _createTimer();
     }
   }
 
   @override
   void update(Json? config) {
     maxTime = config?['maxTime'] ?? maxTime;
-    flushSeverity = (config?['flushSeverity'] != null) ? stringToSeverity(config!['flushSeverity']) : flushSeverity;
-    flushSize = config?['flushSize'] ?? flushSize;
+    _flushSeverity = (config?['flushSeverity'] != null) ? stringToSeverity(config!['flushSeverity']) : _flushSeverity;
+    _flushSize = config?['flushSize'] ?? _flushSize;
   }
 
   @override
   Future<void> push(log) async {    
     if (log.type == LogType.message) {
-      await pushMessage(log as Message);
+      await _pushMessage(log as Message);
     } else {
       InnerLog().e('Invalid log type: ${log.type}');
     }
   }
 
-   Future<void> pushMessage(Message log) async {
+   Future<void> _pushMessage(Message log) async {
     // send message to server
     final Message message = log;
     flushQueue.add(message);
-    if (flushSeverity.index < message.severity.index) {
+    if (_flushSeverity.index < message.severity.index) {
       InnerLog().d('entered flush queue');
-      if (flushQueue.length > flushSize) flushQueue.removeAt(0);
+      if (flushQueue.length > _flushSize) flushQueue.removeAt(0);
     }
     else { // the info must be flushed and saved 
       InnerLog().d('entered save ');
       final flushQueueTemp = [...flushQueue];
       flushQueue = [];
       saveToStorage(flushQueueTemp);
-      createTimer();
+      _createTimer();
     }
   }
 
   @override
   void flush() {
     InnerLog().d('flushed logs');
-    send();
+    _send();
   }
 
-  Future<void> send() async {
+  Future<void> _send() async {
     InnerLog().d('entered send');
     if (timer != null) {
       timer!.cancel();
@@ -170,13 +171,13 @@ class SBCloudAppender implements BaseAppender {
     InnerLog().d('entered load session data');
     final storageData = Storage().getList(SESSION_DATA);
     Storage().remove(SESSION_DATA);
+    _hasLog = false;
     if (storageData == null || storageData.isEmpty) return [];
 
     final List<SessionData> sessionsData = [];
     SessionData? sessionData;
     InnerLog().d('dataType values: ${DataType.values}');
     for (var data in storageData) {
-      // DataType type = DataType.values.firstWhere((e) => e.toString().split('.').last == data['type']);
       DataType type = DataType.values.byName(data['type']);
       switch(type) {
         case DataType.token:
@@ -208,28 +209,30 @@ class SBCloudAppender implements BaseAppender {
   }
 
 
-  void saveToStorage(dynamic data) {
+  void saveToStorage(dynamic data) { // should be private but for testing it is public
     InnerLog().d('entered save to storage');
 
     // first delete all if there are more than maxLogSize
-    var storageData = Storage().getList(SESSION_DATA) as List<Json>?;
-    if (storageData != null && storageData.length > maxLogSize) {
+    var storageData = Storage().getList(SESSION_DATA);
+    if (storageData != null && storageData.length > _maxLogSize) {
       Storage().remove(SESSION_DATA);
       storageData = [];
     }
     
     storageData ??= [];
-    if (storageData.length > maxLogSize) {
+    if (storageData.length > _maxLogSize) {
       Storage().remove(SESSION_DATA);
       storageData.clear();
     }
 
-    if (!hasLog) {
-      hasLog = true;
+    if (!_hasLog) {
+      _hasLog = true;
       final token = SessionManager().token;
       if (token != null) storageData.add(StorageData(type: DataType.token, data: token).toJson());
-      final login = SessionManager().loginObj;
-      if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()).toJson());
+      else if (SessionManager().loginObj != null) {
+        final login = SessionManager().loginObj;
+        if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()).toJson());
+      }
     }
 
     if (data is List<BaseLog>) {
@@ -245,10 +248,10 @@ class SBCloudAppender implements BaseAppender {
     Storage().addAllList(SESSION_DATA, storageData);
   }
 
-  void createTimer() {
+  void _createTimer() {
     if (timer != null) return;
     timer = Timer(Duration(seconds: maxTime), () {
-      send();
+      _send();
       timer = null;
     });
 
