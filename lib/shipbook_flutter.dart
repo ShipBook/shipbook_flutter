@@ -1,18 +1,16 @@
 library shipbook_flutter;
 
-import 'package:shipbook_flutter/networking/connection_client.dart';
+import 'log_manager.dart';
+import 'networking/connection_client.dart';
 
+import 'models/screen_event.dart';
 import 'storage.dart';
 
 import 'models/common_types.dart';
-import '../networking/session_manager.dart';
+import 'networking/session_manager.dart';
 
 import 'inner_log.dart';
 import 'log.dart';
-// import 'log_manager.dart';
-// import 'models/screen_event.dart';
-// import 'networking/connection_client.dart';
-// import 'networking/session_manager.dart';
 
 class Shipbook {
   static Future<String?> start(String appId, String appKey, [String? url]) async {
@@ -33,7 +31,7 @@ class Shipbook {
   }
 
   static void logout() {
-    // sessionManager.logout();
+    SessionManager().logout();
   }
 
   static Log getLogger(String tag) {
@@ -41,12 +39,12 @@ class Shipbook {
   }
 
   static void flush() {
-    // logManager.flush();
+    LogManager().flush();
   }
 
   static void screen(String name) {
-    // final event = ScreenEvent(name);
-    // logManager.push(event);
+    final event = ScreenEvent(name);
+    LogManager().push(event);
   }
 
   static String? getUUID() {

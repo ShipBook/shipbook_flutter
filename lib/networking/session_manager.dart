@@ -70,11 +70,11 @@ class SessionManager {
     this.appId = appId;
     this.appKey = appKey;
     loginObj = Login(appId, appKey);
-    await loginObj!.initializationDone;
     return await innerLogin();
   }
 
   Future<String?> innerLogin() async {
+    await loginObj!.initializationDone;
     if (isInLoginRequest || loginObj == null) return null;
 
     isInLoginRequest = true;

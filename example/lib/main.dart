@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shipbook_flutter/shipbook_flutter.dart';
+final log = Shipbook.getLogger("main");
 
 void main() {
 
@@ -8,21 +9,37 @@ void main() {
   Shipbook.start("64bea27426fa5e22a43b02ec", "10f193043b53eb916239e1ab08c8b4c7");
 }
 
-class RegisterButton extends StatelessWidget {
+class RegisterButton extends StatefulWidget {
   const RegisterButton({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _RegisterButtonState createState() => _RegisterButtonState();
+}
+
+class _RegisterButtonState extends State<RegisterButton> {
+  bool isUserRegistered = false;
+  int counter = 0;
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () {
-        Shipbook.registerUser("test1");
-        // log.i('User registered to Shipbook');
+        setState(() {
+          if (isUserRegistered) {
+            Shipbook.logout();
+            isUserRegistered = false;
+          } else {
+            isUserRegistered = true;
+            Shipbook.registerUser('test$counter', fullName: 'Test User $counter', email: 'test$counter@test.com');
+            counter++;
+          }
+        });
       },
-      child: const Text('Register to Shipbook'),
+      child: Text(!isUserRegistered ? 'Register user [test$counter]' : 'Logout from Shipbook'),
     );
   }
 }
-final log = Shipbook.getLogger("main");
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
