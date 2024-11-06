@@ -1,4 +1,6 @@
 
+import 'package:shipbook_flutter/event_emitter.dart';
+
 import 'models/message.dart';
 import 'models/response/config_response.dart';
 import 'models/appenders/base_appender.dart';
@@ -120,6 +122,6 @@ class LogManager {
       }
     }
 
-    // TODO: Add event emitter
+    EventEmitter().emit(EventType.configChange, config);
   }
 }

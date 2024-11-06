@@ -1,6 +1,7 @@
 import 'common_types.dart';
 
 import 'message.dart';
+import 'screen_event.dart';
 
 enum LogType {
   message, 
@@ -37,7 +38,8 @@ class BaseLog {
     switch (json['type']) {
       case 'message':
         return Message.fromJson(json);
-      // Add cases for other subclasses here
+      case 'screenEvent':
+        return ScreenEvent.fromJson(json);
       default:
         throw Exception('Unknown log type');
     }

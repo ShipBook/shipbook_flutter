@@ -36,7 +36,12 @@ class Message extends BaseLog {
         fileName = match.group(2);
         lineNumber = int.parse(match.group(3)!);
         InnerLog().d('Function: $function FileName: $fileName LineNumber: $lineNumber');
-      } 
+      }
+
+      if (tag != null && tag!.isEmpty) {
+        // get the substring from the first character to the first dot.
+        tag = fileName?.substring(0, fileName!.indexOf('.')) ?? '<unknown>';
+      }
     }
   }
 

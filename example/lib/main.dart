@@ -41,6 +41,22 @@ class _RegisterButtonState extends State<RegisterButton> {
   }
 }
 
+class ScreenButton extends StatelessWidget {
+  const ScreenButton({super.key, required this.screenName});
+
+  final String screenName;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () {
+        Shipbook.screen(screenName);
+      },
+      child: Text('Set screen to $screenName'),
+    );
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -147,6 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const RegisterButton(),
+            const ScreenButton(screenName: 'Home'),
             const Text(
               'You have pushed the button this many times:',
             ),

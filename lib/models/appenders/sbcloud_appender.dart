@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:shipbook_flutter/event_emitter.dart';
-import 'package:shipbook_flutter/models/base_log.dart';
-import 'package:shipbook_flutter/models/message.dart';
-import 'package:shipbook_flutter/models/severity.dart';
-import 'package:shipbook_flutter/networking/session_manager.dart';
-import 'package:shipbook_flutter/storage.dart';
+import '../../event_emitter.dart';
+import '../base_event.dart';
+import '../base_log.dart';
+import '../message.dart';
+import '../severity.dart';
+import '../../networking/session_manager.dart';
+import '/storage.dart';
 
 import '../../networking/connection_client.dart';
 import '../common_types.dart';
@@ -70,7 +71,7 @@ class SBCloudAppender implements BaseAppender {
   var _flushSize = 1000;
   final _maxLogSize = 5000;
 
-  var flushQueue = <BaseLog>[];
+  var _flushQueue = <BaseLog>[];
   Timer? timer;
   var _hasLog = false;
   // appstatesubsicription
@@ -114,6 +115,8 @@ class SBCloudAppender implements BaseAppender {
   Future<void> push(log) async {    
     if (log.type == LogType.message) {
       await _pushMessage(log as Message);
+    } else if (log is BaseEvent) {
+      await _pushEvent(log);
     } else {
       InnerLog().e('Invalid log type: ${log.type}');
     }
@@ -122,18 +125,24 @@ class SBCloudAppender implements BaseAppender {
    Future<void> _pushMessage(Message log) async {
     // send message to server
     final Message message = log;
-    flushQueue.add(message);
+    _flushQueue.add(message);
     if (_flushSeverity.index < message.severity.index) {
       InnerLog().d('entered flush queue');
-      if (flushQueue.length > _flushSize) flushQueue.removeAt(0);
+      if (_flushQueue.length > _flushSize) _flushQueue.removeAt(0);
     }
     else { // the info must be flushed and saved 
       InnerLog().d('entered save ');
-      final flushQueueTemp = [...flushQueue];
-      flushQueue = [];
+      final flushQueueTemp = [..._flushQueue];
+      _flushQueue = [];
       saveToStorage(flushQueueTemp);
       _createTimer();
     }
+  }
+
+  Future<void> _pushEvent(BaseEvent event) async {
+    InnerLog().d('entered push event');
+    _flushQueue.add(event);
+    if (_flushQueue.length > _flushSize) _flushQueue.removeAt(0);
   }
 
   @override
