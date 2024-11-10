@@ -235,7 +235,9 @@ class SBCloudAppender implements BaseAppender {
     if (!_hasLog) {
       _hasLog = true;
       final token = SessionManager().token;
-      if (token != null) storageData.add(StorageData(type: DataType.token, data: token).toJson());
+      if (token != null) { 
+        storageData.add(StorageData(type: DataType.token, data: token).toJson()); 
+      }
       else if (SessionManager().loginObj != null) {
         final login = SessionManager().loginObj;
         if (login != null) storageData.add(StorageData(type: DataType.login, data: login.toJson()).toJson());

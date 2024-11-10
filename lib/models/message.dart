@@ -62,7 +62,7 @@ class Message extends BaseLog {
 
 
   @override
-  Map<String, dynamic> toJson() {
+  Json toJson() {
     final json = super.toJson();
     json['tag'] = tag;
     json['message'] = message;
