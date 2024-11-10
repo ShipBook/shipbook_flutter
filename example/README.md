@@ -1,16 +1,18 @@
-# example
+# ShipBook package for react-native
 
-A new Flutter project.
+## About Shipbook
+[ShipBook](https://www.shipbook.io) gives you the power to remotely gather, search and analyze your user logs and exceptions in the cloud, on a per-user & session basis.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## Resources
+* [Shipbook Documentation](https://docs.shipbook.io)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Author
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Elisha Sterngold ([ShipBook Ltd.](https://www.shipbook.io))
+
+## License
+
+ShipBookSDK is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
