@@ -1,7 +1,7 @@
 name: shipbook_flutter
-description: "A new Flutter package project."
-version: 0.0.1
-homepage:
+description: "Shipbook gives you the power to remotely gather, search and analyze your user logs and exceptions in the cloud, on a per-user & session basis."
+version: 0.1.0
+homepage: https://shipbook.io
 
 environment:
   sdk: ^3.5.2
