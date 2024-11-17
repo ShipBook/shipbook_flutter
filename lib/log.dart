@@ -45,12 +45,14 @@ class Log {
       if (message.tag == null) return;
 
       if (severity.index > LogManager().getSeverity(message.tag!).index) return;
-      final stackTrace = severity.index <= LogManager().getSeverity(message.tag!).index ? StackTrace.current.toString() : null;
-      message.stackTrace = stackTrace;
+      final stackTraceString = severity.index <= LogManager().getSeverity(message.tag!).index ? StackTrace.current.toString() : null;
+      message.stackTrace = StackTraceParser.parse(stackTraceString);
 
     } else {
       if (severity.index > LogManager().getSeverity(tag).index) return;
-      final stackTrace = severity.index <= LogManager().getSeverity(tag).index ? StackTrace.current.toString() : null;
+      final stackTraceString = severity.index <= LogManager().getSeverity(tag).index ? StackTrace.current.toString() : null;
+      final stackTrace = StackTraceParser.parse(stackTraceString);
+      
       message = Message(msg, severity, tag, stackTrace, e, func, file, line);
     }
 
@@ -75,7 +77,8 @@ class Log {
 
   void message(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className}){ 
     if (severity.index > _severity.index ) return;
-    final stackTrace = severity.index <= _callStackSeverity.index ? StackTrace.current.toString() : null;
+    final stackTraceString = severity.index <= _callStackSeverity.index ? StackTrace.current.toString() : null;
+    final stackTrace = StackTraceParser.parse(stackTraceString);
     final message = Message(msg, severity, tag, stackTrace, e, func, file, line);
     LogManager().push(message);
   }
