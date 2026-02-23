@@ -6,7 +6,7 @@ import 'severity.dart';
 import 'base_log.dart';
 
 class Message extends BaseLog {
-  static Set<String> ignoreClasses = <String>{};
+  static int stackOffset = 0;
   String message;
   Severity severity;
   String? tag; // it is initialized after the promise.
@@ -28,12 +28,13 @@ class Message extends BaseLog {
           this.lineNumber,
           [Json? json]) : super(LogType.message, json) {
     if (fileName == null) {
-
+      // Frame 0: Message constructor, 1: Log._message, 2: Log.d/message, 3: caller
+      final frameIndex = 3 + stackOffset;
       final stackTraceString = StackTrace.current.toString();
       final lines = stackTraceString.split('\n');
-      if (lines.length > 3) {
-        final line = lines[3];
-        final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+)(?::(\d+))?\)');
+      if (lines.length > frameIndex) {
+        final line = lines[frameIndex];
+        final regex = RegExp(r'#\d+\s+(.+)\s+\((.+?):(\d+)(?::(\d+))?\)');
         final match = regex.firstMatch(line);
 
         if (match != null) {
@@ -46,8 +47,8 @@ class Message extends BaseLog {
 
       // Fallback for release builds where stack traces aren't parseable.
       // Store the raw caller frame for server-side DWARF symbolication.
-      if (fileName == null && lines.length > 3 && lines[3].isNotEmpty) {
-        callerRawFrame = lines[3];
+      if (fileName == null && lines.length > frameIndex && lines[frameIndex].isNotEmpty) {
+        callerRawFrame = lines[frameIndex];
       }
 
       if ((tag == null || tag!.isEmpty) && fileName != null) {

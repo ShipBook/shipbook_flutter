@@ -19,23 +19,23 @@ class Log {
   }
 
   static error(String message, [Error? e]){
-    Log.staticMessage(message, Severity.Error, e);
+    Log._staticMessage(message, Severity.Error, e);
   }
 
   static warning(String message, [Error? e]){
-    Log.staticMessage(message, Severity.Warning, e);
+    Log._staticMessage(message, Severity.Warning, e);
   }
 
   static info(String message, [Error? e]){
-    Log.staticMessage(message, Severity.Info, e);
+    Log._staticMessage(message, Severity.Info, e);
   }
 
   static debug(String message, [Error? e]){
-    Log.staticMessage(message, Severity.Debug, e);
+    Log._staticMessage(message, Severity.Debug, e);
   }
 
   static verbose(String message, [Error? e]){
-    Log.staticMessage(message, Severity.Verbose, e);
+    Log._staticMessage(message, Severity.Verbose, e);
   }
 
   static void _attachStackTrace(Message message) {
@@ -48,7 +48,13 @@ class Log {
     }
   }
 
+  // Both staticMessage and the convenience methods (error, warning, etc.) route
+  // through _staticMessage so the call depth to Message is always the same (3 frames).
   static void staticMessage(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className, String? tag}){
+    Log._staticMessage(msg, severity, e, func: func, file: file, line: line, className: className, tag: tag);
+  }
+
+  static void _staticMessage(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className, String? tag}){
     Message? message;
     if (tag == null)  {
       message = Message(msg, severity,null, null, e, func, file, line);
@@ -63,22 +69,28 @@ class Log {
   }
 
   e(String message, [Error? e]){
-    this.message(message, Severity.Error, e);
+    _message(message, Severity.Error, e);
   }
   w(String message, [Error? e]){
-    this.message(message, Severity.Warning, e);
+    _message(message, Severity.Warning, e);
   }
   i(String message, [Error? e]){
-    this.message(message, Severity.Info, e);
+    _message(message, Severity.Info, e);
   }
   d(String message, [Error? e]){
-    this.message(message, Severity.Debug, e);
+    _message(message, Severity.Debug, e);
   }
   v(String message, [Error? e]){
-    this.message(message, Severity.Verbose, e);
+    _message(message, Severity.Verbose, e);
   }
 
+  // Both message and the convenience methods (e, w, i, d, v) route through
+  // _message so the call depth to Message is always the same (3 frames).
   void message(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className}){
+    _message(msg, severity, e, func: func, file: file, line: line, className: className);
+  }
+
+  void _message(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className}){
     if (severity.index > _severity.index ) return;
     final message = Message(msg, severity, tag, null, e, func, file, line);
     if (severity.index <= _callStackSeverity.index) _attachStackTrace(message);

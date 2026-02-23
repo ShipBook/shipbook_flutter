@@ -4,9 +4,11 @@ import 'log_manager.dart';
 import 'networking/connection_client.dart';
 
 import 'models/screen_event.dart';
+import 'models/message.dart';
+import 'models/appenders/base_appender.dart';
+import 'models/common_types.dart';
 import 'storage.dart';
 
-import 'models/common_types.dart';
 import 'networking/session_manager.dart';
 
 import 'inner_log.dart';
@@ -49,5 +51,13 @@ class Shipbook {
 
   static String? getUUID() {
     return SessionManager().getUUID();
+  }
+
+  static void setStackOffset(int offset) {
+    Message.stackOffset = offset;
+  }
+
+  static void registerAppender(String type, AppenderCreator creator) {
+    BaseAppender.register(type, creator);
   }
 }
