@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shipbook_flutter/log.dart';
 import 'package:shipbook_flutter/shipbook_flutter.dart';
 final log = Shipbook.getLogger("main");
 
@@ -31,7 +32,7 @@ class _RegisterButtonState extends State<RegisterButton> {
             isUserRegistered = false;
           } else {
             isUserRegistered = true;
-            Shipbook.registerUser('test$counter', fullName: 'Test User $counter', email: 'test$counter@test.com');
+            Shipbook.registerUser('test$counter', fullName: 'Test User $counter', email: 'test$counter@test.com', additionalInfo: {'key1': 'value1', 'key2': 'value2'});
             counter++;
           }
         });
@@ -114,6 +115,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _incrementCounter() {
 
     log.i('Incrementing counter $_counter');
+    Log.info('Static log: Incrementing counter $_counter');
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -122,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
       log.d('Counter incremented to $_counter');
+      Log.debug('Static log: Counter incremented to $_counter');
     });
   }
 

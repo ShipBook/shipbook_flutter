@@ -17,7 +17,7 @@ class Log {
       _callStackSeverity = LogManager().getCallStackSeverity(tag);
     });
   }
-  
+
   static error(String message, [Error? e]){
     Log.staticMessage(message, Severity.Error, e);
   }
@@ -38,24 +38,27 @@ class Log {
     Log.staticMessage(message, Severity.Verbose, e);
   }
 
-  static void staticMessage(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className, String? tag}){ 
+  static void _attachStackTrace(Message message) {
+    final stackTraceString = StackTrace.current.toString();
+    final stackTrace = StackTraceParser.parse(stackTraceString);
+    if (stackTrace != null && stackTrace.isNotEmpty) {
+      message.stackTrace = stackTrace;
+    } else {
+      message.callStackSymbols = stackTraceString.split('\n').where((l) => l.isNotEmpty).toList();
+    }
+  }
+
+  static void staticMessage(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className, String? tag}){
     Message? message;
     if (tag == null)  {
       message = Message(msg, severity,null, null, e, func, file, line);
-      if (message.tag == null) return;
-
       if (severity.index > LogManager().getSeverity(message.tag!).index) return;
-      final stackTraceString = severity.index <= LogManager().getSeverity(message.tag!).index ? StackTrace.current.toString() : null;
-      message.stackTrace = StackTraceParser.parse(stackTraceString);
-
     } else {
       if (severity.index > LogManager().getSeverity(tag).index) return;
-      final stackTraceString = severity.index <= LogManager().getSeverity(tag).index ? StackTrace.current.toString() : null;
-      final stackTrace = StackTraceParser.parse(stackTraceString);
-      
-      message = Message(msg, severity, tag, stackTrace, e, func, file, line);
+      message = Message(msg, severity, tag, null, e, func, file, line);
     }
 
+    if (severity.index <= LogManager().getCallStackSeverity(message.tag!).index) _attachStackTrace(message);
     LogManager().push(message);
   }
 
@@ -75,11 +78,10 @@ class Log {
     this.message(message, Severity.Verbose, e);
   }
 
-  void message(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className}){ 
+  void message(String msg, Severity severity, Error? e, {String? func, String? file, int? line, String? className}){
     if (severity.index > _severity.index ) return;
-    final stackTraceString = severity.index <= _callStackSeverity.index ? StackTrace.current.toString() : null;
-    final stackTrace = StackTraceParser.parse(stackTraceString);
-    final message = Message(msg, severity, tag, stackTrace, e, func, file, line);
+    final message = Message(msg, severity, tag, null, e, func, file, line);
+    if (severity.index <= _callStackSeverity.index) _attachStackTrace(message);
     LogManager().push(message);
   }
 }

@@ -15,8 +15,10 @@ class Message extends BaseLog {
   String? function;
   String? fileName;
   int? lineNumber;
+  String? callerRawFrame; // Raw caller frame for server-side DWARF symbolication (single frame)
+  List<String>? callStackSymbols; // Full raw stack trace for server-side DWARF symbolication
 
-  Message(this.message, 
+  Message(this.message,
           this.severity,
           this.tag,
           this.stackTrace,
@@ -27,22 +29,35 @@ class Message extends BaseLog {
           [Json? json]) : super(LogType.message, json) {
     if (fileName == null) {
 
-      final stackTraceElement = StackTrace.current.toString();
-      final line = stackTraceElement.split('\n')[3];
-      final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+):(\d+)\)');
-      final match = regex.firstMatch(line);
+      final stackTraceString = StackTrace.current.toString();
+      final lines = stackTraceString.split('\n');
+      if (lines.length > 3) {
+        final line = lines[3];
+        final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+):(\d+)\)');
+        final match = regex.firstMatch(line);
 
-      if (match != null) {
-        function = match.group(1);
-        fileName = match.group(2);
-        lineNumber = int.parse(match.group(3)!);
-        InnerLog().d('Function: $function FileName: $fileName LineNumber: $lineNumber');
+        if (match != null) {
+          function = match.group(1);
+          fileName = match.group(2);
+          lineNumber = int.parse(match.group(3)!);
+          InnerLog().d('Function: $function FileName: $fileName LineNumber: $lineNumber');
+        }
       }
 
-      if (tag == null || tag!.isEmpty) {
-        // get the substring from the first character to the first dot.
-        tag = fileName?.substring(0, fileName!.indexOf('.')) ?? '<unknown>';
+      // Fallback for release builds where stack traces aren't parseable.
+      // Store the raw caller frame for server-side DWARF symbolication.
+      if (fileName == null && lines.length > 3 && lines[3].isNotEmpty) {
+        callerRawFrame = lines[3];
       }
+
+      if ((tag == null || tag!.isEmpty) && fileName != null) {
+        final dotIndex = fileName!.indexOf('.');
+        tag = dotIndex > 0 ? fileName!.substring(0, dotIndex) : fileName;
+      }
+
+      fileName ??= '';
+      lineNumber ??= -1;
+      tag ??= '';
     }
   }
 
@@ -51,7 +66,7 @@ class Message extends BaseLog {
     final stackTrace = StackTraceParser.fromJsonList(
        (json['stackTrace'] as List?)?.cast<Map<String, dynamic>>()
     );
-    return Message(
+    final msg = Message(
       json['message'],
       Severity.values.byName(json['severity']),
       json['tag'],
@@ -62,6 +77,9 @@ class Message extends BaseLog {
       json['lineNumber'],
       json
     );
+    msg.callerRawFrame = json['callerRawFrame'];
+    msg.callStackSymbols = (json['callStackSymbols'] as List?)?.cast<String>();
+    return msg;
   }
 
 
@@ -75,7 +93,12 @@ class Message extends BaseLog {
     json['fileName'] = fileName;
     json['lineNumber'] = lineNumber;
     
-    if (stackTrace != null) json['stackTrace'] = stackTrace;
+    if (callerRawFrame != null) json['callerRawFrame'] = callerRawFrame;
+    if (callStackSymbols != null) {
+      json['callStackSymbols'] = callStackSymbols;
+    } else if (stackTrace != null) {
+      json['stackTrace'] = stackTrace;
+    }
     if (error != null) json['error'] = error;
 
     // if (exception != null) json['exception'] = exception;
@@ -93,7 +116,8 @@ class StackTraceParser {
     for (var i = 1; i < lines.length; i++) {
       final line = lines[i];
       if (line.isEmpty) continue;
-      elements.add(StackTraceElement.fromString(line));
+      final element = StackTraceElement.tryParse(line);
+      if (element != null) elements.add(element);
     }
 
     return elements;
@@ -142,7 +166,7 @@ class StackTraceElement {
     );
   }
 
-  factory StackTraceElement.fromString(String line) {
+  static StackTraceElement? tryParse(String line) {
     final regex = RegExp(r'#\d+\s+(\w+)\.(\w+)\s+\((.+):(\d+):(\d+)\)');
     final match = regex.firstMatch(line);
 
@@ -155,7 +179,7 @@ class StackTraceElement {
       );
     }
 
-    return StackTraceElement('<unknown>', '<unknown>', '<unknown>', 0);
+    return null;
   }
 
   Json toJson() {
