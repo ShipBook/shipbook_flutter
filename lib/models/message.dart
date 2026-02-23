@@ -33,7 +33,7 @@ class Message extends BaseLog {
       final lines = stackTraceString.split('\n');
       if (lines.length > 3) {
         final line = lines[3];
-        final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+):(\d+)\)');
+        final regex = RegExp(r'#\d+\s+(.+)\s+\((.+):(\d+)(?::(\d+))?\)');
         final match = regex.firstMatch(line);
 
         if (match != null) {
