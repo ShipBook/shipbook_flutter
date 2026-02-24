@@ -20,7 +20,7 @@ class Login {
   String osVersion = '';
   String appVersion = '';
   String appBuild = '';
-  String sdkVersion = '0.1.1';
+  String sdkVersion = '1.0.0';
   String manufacturer = '';
   String deviceName = '';
   String deviceModel = '';
