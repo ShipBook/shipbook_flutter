@@ -2,6 +2,7 @@ import '../../inner_log.dart';
 
 import '../base_log.dart';
 import '../common_types.dart';
+import '../exception.dart';
 import '../message.dart';
 
 import 'base_appender.dart';
@@ -13,7 +14,7 @@ class ConsoleAppender implements BaseAppender {
   ConsoleAppender(this.name, Json? config) : pattern = config?['pattern'] {
     InnerLog().i('ConsoleAppender pattern: $pattern');
   }
-  
+
   @override
   void update(Json? config) {
     // Do nothing
@@ -26,8 +27,15 @@ class ConsoleAppender implements BaseAppender {
       final text = '${message.fileName} ${message.lineNumber} ${message.message}';
       // ignore: avoid_print
       print('${message.severity} $text');
+      if (message.exception != null) {
+        // ignore: avoid_print
+        print('  ${message.exception!.name}: ${message.exception!.reason}');
+      }
+    } else if (log.type == LogType.exception) {
+      final exception = log as SBException;
+      // ignore: avoid_print
+      print('Exception ${exception.name}: ${exception.reason}');
     }
-    
   }
 
   @override

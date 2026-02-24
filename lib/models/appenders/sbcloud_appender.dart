@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../../event_emitter.dart';
 import '../base_event.dart';
 import '../base_log.dart';
+import '../exception.dart';
 import '../message.dart';
 import '../severity.dart';
 import '../../networking/session_manager.dart';
@@ -112,9 +113,11 @@ class SBCloudAppender implements BaseAppender {
   }
 
   @override
-  Future<void> push(log) async {    
+  Future<void> push(log) async {
     if (log.type == LogType.message) {
       await _pushMessage(log as Message);
+    } else if (log.type == LogType.exception) {
+      await _pushException(log as SBException);
     } else if (log is BaseEvent) {
       await _pushEvent(log);
     } else {
@@ -137,6 +140,15 @@ class SBCloudAppender implements BaseAppender {
       saveToStorage(flushQueueTemp);
       _createTimer();
     }
+  }
+
+  Future<void> _pushException(SBException exception) async {
+    InnerLog().d('entered push exception');
+    _flushQueue.add(exception);
+    final flushQueueTemp = [..._flushQueue];
+    _flushQueue = [];
+    saveToStorage(flushQueueTemp);
+    _createTimer();
   }
 
   Future<void> _pushEvent(BaseEvent event) async {

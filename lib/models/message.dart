@@ -5,6 +5,32 @@ import 'severity.dart';
 
 import 'base_log.dart';
 
+class MessageException {
+  String? name;
+  String? reason;
+  List<StackTraceElement> stackTrace;
+
+  MessageException(this.name, this.reason, this.stackTrace);
+
+  factory MessageException.fromJson(Json json) {
+    final stackTrace = StackTraceParser.fromJsonList(
+        (json['stackTrace'] as List?)?.cast<Map<String, dynamic>>());
+    return MessageException(
+      json['name'],
+      json['reason'],
+      stackTrace ?? [],
+    );
+  }
+
+  Json toJson() {
+    return {
+      'name': name,
+      'reason': reason,
+      'stackTrace': stackTrace.map((e) => e.toJson()).toList(),
+    };
+  }
+}
+
 class Message extends BaseLog {
   static int stackOffset = 0;
   String message;
@@ -12,6 +38,7 @@ class Message extends BaseLog {
   String? tag; // it is initialized after the promise.
   List<StackTraceElement>? stackTrace;
   Error? error;
+  MessageException? exception;
   String? function;
   String? fileName;
   int? lineNumber;
@@ -27,6 +54,15 @@ class Message extends BaseLog {
           this.fileName,
           this.lineNumber,
           [Json? json]) : super(LogType.message, json) {
+    if (error != null) {
+      final errorStackTrace = StackTraceParser.parse(StackTrace.current.toString());
+      exception = MessageException(
+        error.runtimeType.toString(),
+        error.toString(),
+        errorStackTrace ?? [],
+      );
+    }
+
     if (fileName == null) {
       // Frame 0: Message constructor, 1: Log._message, 2: Log.d/message, 3: caller
       final frameIndex = 3 + stackOffset;
@@ -80,6 +116,9 @@ class Message extends BaseLog {
     );
     msg.callerRawFrame = json['callerRawFrame'];
     msg.callStackSymbols = (json['callStackSymbols'] as List?)?.cast<String>();
+    if (json['exception'] is Map<String, dynamic>) {
+      msg.exception = MessageException.fromJson(json['exception']);
+    }
     return msg;
   }
 
@@ -100,10 +139,7 @@ class Message extends BaseLog {
     } else if (stackTrace != null) {
       json['stackTrace'] = stackTrace;
     }
-    if (error != null) json['error'] = error;
-
-    // if (exception != null) json['exception'] = exception;
-    // if (exceptionType != null) json['exceptionType'] = exceptionType;
+    if (exception != null) json['exception'] = exception!.toJson();
     return json;
   }
 }

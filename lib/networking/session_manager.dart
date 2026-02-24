@@ -2,6 +2,7 @@ import 'dart:convert';
 // import '../event_emitter.dart';
 import 'package:shipbook_flutter/event_emitter.dart';
 
+import '../exception_manager.dart';
 import '../log_manager.dart';
 import '../models/common_types.dart';
 import '../storage.dart';
@@ -113,7 +114,7 @@ class SessionManager {
   }
 
   void readConfig(ConfigResponse config) {
-    if (!config.exceptionReportDisabled)  InnerLog().i('exception enabled');//exceptionManager.start();
+    if (!config.exceptionReportDisabled) ExceptionManager().start();
     if (!config.eventLoggingDisabled) {
       InnerLog().i('event loggint enabled');//eventManager.enableAppState();
     }

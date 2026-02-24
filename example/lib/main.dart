@@ -3,13 +3,13 @@ import 'package:shipbook_flutter/shipbook_flutter.dart';
 final log = Shipbook.getLogger("main");
 
 void main() {
+  runApp(const MyApp());
   Shipbook.enableInnerLog(true);
   const connectionUrl = String.fromEnvironment('SHIPBOOK_URL');
   const appId = String.fromEnvironment('SHIPBOOK_APP_ID');
   const appKey = String.fromEnvironment('SHIPBOOK_APP_KEY');
   if (connectionUrl.isNotEmpty) Shipbook.setConnectionUrl(connectionUrl);
   Shipbook.start(appId, appKey);
-  runApp(const MyApp());
 }
 
 class RegisterButton extends StatefulWidget {

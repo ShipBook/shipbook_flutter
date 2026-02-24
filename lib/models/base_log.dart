@@ -1,5 +1,6 @@
 import 'common_types.dart';
 
+import 'exception.dart';
 import 'message.dart';
 import 'screen_event.dart';
 
@@ -38,6 +39,8 @@ class BaseLog {
     switch (json['type']) {
       case 'message':
         return Message.fromJson(json);
+      case 'exception':
+        return SBException.fromJson(json);
       case 'screenEvent':
         return ScreenEvent.fromJson(json);
       default:
