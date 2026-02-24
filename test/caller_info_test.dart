@@ -2,33 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:shipbook_flutter/models/message.dart';
 import 'package:shipbook_flutter/models/severity.dart';
-import 'package:shipbook_flutter/models/base_log.dart';
-import 'package:shipbook_flutter/models/appenders/base_appender.dart';
-import 'package:shipbook_flutter/models/common_types.dart';
 import 'package:shipbook_flutter/log.dart';
 import 'package:shipbook_flutter/log_manager.dart';
 
-class TestAppender implements BaseAppender {
-  @override
-  final String name;
-  final List<Message> messages = [];
-
-  TestAppender(this.name, [Json? config]);
-
-  @override
-  void update(Json config) {}
-
-  @override
-  void push(BaseLog log) {
-    if (log is Message) messages.add(log);
-  }
-
-  @override
-  void flush() {}
-
-  @override
-  void dispose() {}
-}
+import 'helpers/test_appender.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -53,7 +30,7 @@ void main() {
 
       expect(testAppender.messages.length, 1);
       final msg = testAppender.messages.first;
-      expect(msg.fileName, contains('shipbook_flutter_test.dart'));
+      expect(msg.fileName, contains('caller_info_test.dart'));
       expect(msg.lineNumber, expectedLine);
     });
 
@@ -63,7 +40,7 @@ void main() {
 
       expect(testAppender.messages.length, 1);
       final msg = testAppender.messages.first;
-      expect(msg.fileName, contains('shipbook_flutter_test.dart'));
+      expect(msg.fileName, contains('caller_info_test.dart'));
       expect(msg.lineNumber, expectedLine);
     });
 
@@ -72,7 +49,7 @@ void main() {
 
       expect(testAppender.messages.length, 1);
       final msg = testAppender.messages.first;
-      expect(msg.fileName, contains('shipbook_flutter_test.dart'));
+      expect(msg.fileName, contains('caller_info_test.dart'));
       expect(msg.lineNumber, expectedLine);
     });
 
@@ -81,7 +58,7 @@ void main() {
 
       expect(testAppender.messages.length, 1);
       final msg = testAppender.messages.first;
-      expect(msg.fileName, contains('shipbook_flutter_test.dart'));
+      expect(msg.fileName, contains('caller_info_test.dart'));
       expect(msg.lineNumber, expectedLine);
     });
 
@@ -92,12 +69,10 @@ void main() {
 
       expect(testAppender.messages.length, 1);
       final msg = testAppender.messages.first;
-      expect(msg.fileName, contains('shipbook_flutter_test.dart'));
+      expect(msg.fileName, contains('caller_info_test.dart'));
       expect(msg.lineNumber, expectedLine);
     });
   });
-
-
 }
 
 /// Helper: wrapper function that adds one extra frame
