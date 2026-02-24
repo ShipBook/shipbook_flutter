@@ -7,7 +7,11 @@ void main() {
 
   runApp(const MyApp());
   Shipbook.enableInnerLog(true);
-  Shipbook.start("appId", "appKey");
+  const connectionUrl = String.fromEnvironment('SHIPBOOK_URL');
+  const appId = String.fromEnvironment('SHIPBOOK_APP_ID');
+  const appKey = String.fromEnvironment('SHIPBOOK_APP_KEY');
+  if (connectionUrl.isNotEmpty) Shipbook.setConnectionUrl(connectionUrl);
+  Shipbook.start(appId, appKey);
 }
 
 class RegisterButton extends StatefulWidget {

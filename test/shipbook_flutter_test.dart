@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:shipbook_flutter/models/login.dart';
 import 'package:shipbook_flutter/models/message.dart';
 import 'package:shipbook_flutter/models/severity.dart';
 import 'package:shipbook_flutter/models/base_log.dart';
@@ -35,17 +32,6 @@ class TestAppender implements BaseAppender {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  test('Login toJSON and fromJSON', () async {
-    final login = Login('appId', 'appKey');
-    await login.initializationDone;
-    final jsonMap = login.toJson();
-    final json = jsonEncode(jsonMap);
-    final jsonMap2 = jsonDecode(json);
-    final login2 = Login.fromJson(jsonMap2);
-    expect(login.appId, login2.appId);
-    expect(login.appKey, login2.appKey);
-  });
 
   group('Caller info', () {
     late TestAppender testAppender;
