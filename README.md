@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/pub/v/shipbook_flutter.svg)](https://pub.dev/packages/shipbook_flutter)
 
-Shipbook SDK for Flutter applications. Capture logs, errors, and exceptions from your Flutter apps and view them in the [Shipbook console](https://console.shipbook.io/).
+Shipbook SDK for Flutter applications. Capture logs, errors, and exceptions from your Flutter apps and view them in the [Shipbook console](https://console.shipbook.io/). Learn more at [shipbook.io](https://www.shipbook.io/).
 
 ## Installation
 
