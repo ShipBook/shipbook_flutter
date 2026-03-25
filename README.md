@@ -110,13 +110,13 @@ Log.verbose('Trace info');
 2. Create a new application in the console
 3. Copy your App ID and App Key from the application settings
 
-For full setup instructions, see the [Flutter documentation](https://docs.shipbook.io/flutter-log-integration).
+For full setup instructions, see the [Flutter documentation](https://www.shipbook.io/docs/flutter-log-integration).
 
 ## Links
 
 - [Shipbook Website](https://www.shipbook.io/)
 - [Shipbook Console](https://console.shipbook.io/)
-- [Documentation](https://docs.shipbook.io/)
+- [Documentation](https://www.shipbook.io/docs/)
 - [GitHub Repository](https://github.com/ShipBook/shipbook_flutter)
 
 ## Author
