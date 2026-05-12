@@ -99,6 +99,10 @@ class SessionManager {
         Storage().setString('config', jsonEncode(json['config']));
 
         return json['sessionUrl'];
+      } else if (resp.statusCode >= 400 && resp.statusCode < 500) {
+        // 4xx on loginSdk = integration error (bad appId/appKey, app deleted). Retrying won't help — caller must fix the integration.
+        InnerLog().e('loginSdk rejected with ${resp.statusCode} — check appId/appKey. Will not retry. body: ${resp.body}');
+        return null;
       } else {
         InnerLog().e('didn\'t succeed to log');
         var text = resp.body;
