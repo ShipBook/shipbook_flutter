@@ -63,14 +63,20 @@ class SessionManager {
   bool isInLoginRequest = false;
 
   Future<String?> login(String appId, String appKey) async {
-    var configString = Storage().getString('config');
-    configString ??= defaultConfig;
-    final config = ConfigResponse.fromJson(jsonDecode(configString));
-    readConfig(config);
-
     this.appId = appId;
     this.appKey = appKey;
     loginObj = Login(appId, appKey);
+
+    ConfigResponse config;
+    try {
+      config = ConfigResponse.fromJson(jsonDecode(Storage().getString('config') ?? defaultConfig));
+    } catch (e) {
+      // A corrupt cached config must never block login, otherwise the SDK stays silent until app data is cleared.
+      InnerLog().w('cached config is corrupt, deleting it and falling back to the default config: $e');
+      Storage().remove('config');
+      config = ConfigResponse.fromJson(jsonDecode(defaultConfig));
+    }
+    readConfig(config);
     return await innerLogin();
   }
 
