@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shipbook_flutter/log_manager.dart';
 import 'package:shipbook_flutter/networking/session_manager.dart';
+import 'package:shipbook_flutter/shipbook_flutter.dart';
 import 'package:shipbook_flutter/storage.dart';
 
 void main() {
@@ -26,6 +31,7 @@ void main() {
     );
     LogManager().clear();
     SessionManager().loginObj = null;
+    SessionManager().sessionLink = null;
   });
 
   tearDown(() {
@@ -70,5 +76,38 @@ void main() {
 
     expect(SessionManager().loginObj, isNotNull);
     expect(LogManager().appenders.keys, contains('cloud'));
+  });
+
+  Future<void> loginWithResponse(Map<String, dynamic> body) async {
+    await seedConfig(null);
+    await http.runWithClient(
+      () => SessionManager().login('appId', 'appKey'),
+      () => MockClient((request) async => http.Response(jsonEncode(body), 200)),
+    );
+  }
+
+  final configJson = jsonDecode(customConfig);
+
+  test('session headers carry the session link from login', () async {
+    await loginWithResponse({
+      'token': 'token',
+      'sessionUrl': 'https://console.shipbook.io/session',
+      'sessionLink': '1:698ad6e6595b3f6a7590b24f:66f1c2a9e4b0d3f8a1b2c3d4',
+      'config': configJson,
+    });
+
+    expect(Shipbook.getSessionHeaders(), {'x-shipbook-session': '1:698ad6e6595b3f6a7590b24f:66f1c2a9e4b0d3f8a1b2c3d4'});
+  });
+
+  test('session headers are empty before login completes', () {
+    expect(Shipbook.getSessionHeaders(), isEmpty);
+  });
+
+  test('a new login without a session link clears the previous one', () async {
+    SessionManager().sessionLink = '1:698ad6e6595b3f6a7590b24f:66f1c2a9e4b0d3f8a1b2c3d4';
+
+    await loginWithResponse({'token': 'token', 'sessionUrl': 'https://console.shipbook.io/session', 'config': configJson});
+
+    expect(Shipbook.getSessionHeaders(), isEmpty, reason: 'a silenced login carries no link, and the old session is gone');
   });
 }
