@@ -86,6 +86,20 @@ Shipbook.registerUser(
 Shipbook.logout();
 ```
 
+### Link Sessions with Your Backend
+
+Add the session headers to requests toward your own backend, and the Shipbook console links this app session to the sessions those requests create in your Node.js backend:
+
+```dart
+await http.post(
+  Uri.parse('https://api.your-backend.com/checkout'),
+  headers: {'Content-Type': 'application/json', ...Shipbook.getSessionHeaders()},
+  body: jsonEncode(cart),
+);
+```
+
+It returns an empty map until login completes, so spreading it is always safe.
+
 ### Screen Tracking
 
 ```dart

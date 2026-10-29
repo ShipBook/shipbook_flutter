@@ -39,12 +39,14 @@ const defaultConfig =
 ;
 
 class SessionManager {
+  static const _sessionLinkHeader = 'x-shipbook-session';
 
   static final SessionManager _instance = SessionManager._internal();
   factory SessionManager() => _instance;
   SessionManager._internal();
 
   String? token;
+  String? sessionLink;
   Login? _loginObj;
 
   Login? get loginObj {
@@ -86,6 +88,7 @@ class SessionManager {
 
     isInLoginRequest = true;
     token = null;
+    sessionLink = null;
     try {
       var loginObjData = loginObj!.toJson();
       InnerLog().d('loginObjData: $loginObjData');
@@ -98,6 +101,7 @@ class SessionManager {
         var json = jsonDecode(resp.body);
         InnerLog().i('Succeeded!: $json');
         token = json['token'];
+        sessionLink = json['sessionLink']; // absent when the device is silenced
 
         readConfig(ConfigResponse.fromJson(json['config']));
 
@@ -165,6 +169,13 @@ class SessionManager {
 
   String? getUUID() {
     return loginObj?.udid;
+  }
+
+  // Empty until login completes and on silenced devices, so callers can always spread it.
+  Map<String, String> getSessionHeaders() {
+    final link = sessionLink;
+    if (link == null) return {};
+    return {_sessionLinkHeader: link};
   }
 }
 

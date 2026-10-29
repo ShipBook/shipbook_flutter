@@ -53,6 +53,12 @@ class Shipbook {
     return SessionManager().getUUID();
   }
 
+  /// Headers to attach to requests toward your own backend so its Shipbook sessions
+  /// link back to this app session (empty until login completes).
+  static Map<String, String> getSessionHeaders() {
+    return SessionManager().getSessionHeaders();
+  }
+
   static void setStackOffset(int offset) {
     Message.stackOffset = offset;
   }
