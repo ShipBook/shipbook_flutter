@@ -116,8 +116,7 @@ class SBCloudAppender implements BaseAppender {
   @override
   Future<void> push(log) async {
     if (SessionManager().paused) return;
-    // pausedUntil stays set after a pause has ended, until a login follows
-    if (SessionManager().pausedUntil != null) SessionManager().innerLogin();
+    SessionManager().loginAfterStop();
 
     if (log.type == LogType.message) {
       await _pushMessage(log as Message);
@@ -175,7 +174,8 @@ class SBCloudAppender implements BaseAppender {
       timer = null;
     }
 
-    if (SessionManager().token == null) return; 
+    // loadSessionData empties the storage, so it must not run while nothing can be sent
+    if (SessionManager().token == null || SessionManager().stopped) return;
 
     final sessionsData = loadSessionData();
 

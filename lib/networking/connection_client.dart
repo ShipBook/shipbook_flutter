@@ -1,10 +1,8 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:http/http.dart';
 
-import '../inner_log.dart';
 import '../models/login.dart';
 import './session_manager.dart';
 
@@ -13,11 +11,9 @@ enum HttpMethod { get, post, put, delete }
 class ConnectionClient {
   // ignore: non_constant_identifier_names
   static var BASE_URL = "https://api.shipbook.io/v2/";
-  static const _maxPauseSeconds = 30 * 24 * 60 * 60;
-  static const _defaultPauseSeconds = 60 * 60;
 
   static Future<Response> request(String url, [Object? body, HttpMethod method = HttpMethod.get]) async {
-    if (SessionManager().paused) return Response('', 429);
+    if (SessionManager().stopped) return Response('', 429);
 
     Response resp;
     final uri = Uri.parse(BASE_URL + url);
@@ -53,12 +49,11 @@ class ConnectionClient {
         break;
     }
 
-    final retryAfter = resp.statusCode < 400 ? 0 : int.tryParse(resp.headers['retry-after'] ?? '', radix: 10) ?? 0;
-    if (retryAfter > 0 || resp.statusCode == 429) {
-      final pauseSeconds = retryAfter > 0 ? min(retryAfter, _maxPauseSeconds) : _defaultPauseSeconds;
-      final until = DateTime.now().add(Duration(seconds: pauseSeconds));
-      SessionManager().pause(until);
-      InnerLog().w('Shipbook paused until ${until.toUtc().toIso8601String()}: the server answered ${resp.statusCode} ${retryAfter > 0 ? 'with Retry-After $retryAfter' : 'without Retry-After'}');
+    final pauseSeconds = resp.statusCode < 400 ? 0 : int.tryParse(resp.headers['x-shipbook-pause'] ?? '', radix: 10) ?? 0;
+    if (pauseSeconds > 0) {
+      SessionManager().pause(pauseSeconds, resp.statusCode);
+    } else if (resp.statusCode == 429 || resp.statusCode == 503) {
+      SessionManager().backOff(int.tryParse(resp.headers['retry-after'] ?? '', radix: 10) ?? 0, resp.statusCode);
     }
 
     if (resp.statusCode == 401 && resp.reasonPhrase == 'TokenExpired') { // call refresh token

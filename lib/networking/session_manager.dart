@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 // import '../event_emitter.dart';
 import 'package:shipbook_flutter/event_emitter.dart';
 
@@ -41,6 +42,9 @@ const defaultConfig =
 class SessionManager {
   static const _sessionLinkHeader = 'x-shipbook-session';
   static const _pauseKey = 'pause';
+  static const _maxPause = Duration(days: 30);
+  static const _maxBackoffSeconds = 60 * 60;
+  static const _defaultBackoffSeconds = 5 * 60;
 
   static final SessionManager _instance = SessionManager._internal();
   factory SessionManager() => _instance;
@@ -65,8 +69,10 @@ class SessionManager {
 
   bool isInLoginRequest = false;
   DateTime? pausedUntil;
+  DateTime? backoffUntil;
 
   bool get paused => pausedUntil?.isAfter(DateTime.now()) ?? false;
+  bool get stopped => paused || (backoffUntil?.isAfter(DateTime.now()) ?? false);
 
   Future<String?> login(String appId, String appKey) async {
     this.appId = appId;
@@ -94,17 +100,17 @@ class SessionManager {
     } catch (e) {
       InnerLog().w('saved pause is corrupt, deleting it: $e');
     }
-    if (paused) {
-      InnerLog().w('Shipbook is paused until ${pausedUntil!.toUtc().toIso8601String()} (from an earlier run); nothing will be sent');
+    if (paused && !pausedUntil!.isAfter(DateTime.now().add(_maxPause))) {
+      InnerLog().w('paused until ${_utc(pausedUntil!)} (from an earlier run); nothing will be sent');
     } else if (savedPause != null) {
+      pausedUntil = null;
       Storage().remove(_pauseKey);
     }
     return await innerLogin();
   }
 
   Future<String?> innerLogin() async {
-    if (paused) return null;
-    pausedUntil = null;
+    if (stopped) return null;
 
     await loginObj!.initializationDone;
     if (isInLoginRequest || loginObj == null) return null;
@@ -162,12 +168,29 @@ class SessionManager {
     LogManager().config(config);
   }
 
-  void pause(DateTime until) {
+  void pause(int seconds, int status) {
+    final until = DateTime.now().add(Duration(seconds: min(seconds, _maxPause.inSeconds)));
     pausedUntil = until;
     token = null;
     sessionLink = null;
     Storage().setString(_pauseKey, jsonEncode({'appId': appId, 'sdkVersion': Login.currentSdkVersion, 'until': until.millisecondsSinceEpoch}));
+    InnerLog().w('paused until ${_utc(until)}: the server answered $status with x-shipbook-pause $seconds');
   }
+
+  void backOff(int retryAfter, int status) {
+    final until = DateTime.now().add(Duration(seconds: retryAfter > 0 ? min(retryAfter, _maxBackoffSeconds) : _defaultBackoffSeconds));
+    backoffUntil = until;
+    InnerLog().w('backing off until ${_utc(until)}: the server answered $status');
+  }
+
+  void loginAfterStop() {
+    if (stopped || (pausedUntil == null && backoffUntil == null)) return;
+    pausedUntil = null;
+    backoffUntil = null;
+    if (token == null) innerLogin();
+  }
+
+  String _utc(DateTime time) => '${time.toUtc().toIso8601String().split('.').first}Z';
 
   void logout() {
     token = null;
