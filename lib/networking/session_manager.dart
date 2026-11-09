@@ -40,6 +40,7 @@ const defaultConfig =
 
 class SessionManager {
   static const _sessionLinkHeader = 'x-shipbook-session';
+  static const _pauseKey = 'pause';
 
   static final SessionManager _instance = SessionManager._internal();
   factory SessionManager() => _instance;
@@ -63,6 +64,9 @@ class SessionManager {
   String? appKey;
 
   bool isInLoginRequest = false;
+  DateTime? pausedUntil;
+
+  bool get paused => pausedUntil?.isAfter(DateTime.now()) ?? false;
 
   Future<String?> login(String appId, String appKey) async {
     this.appId = appId;
@@ -79,10 +83,29 @@ class SessionManager {
       config = ConfigResponse.fromJson(jsonDecode(defaultConfig));
     }
     readConfig(config);
+
+    final savedPause = Storage().getString(_pauseKey);
+    pausedUntil = null;
+    try {
+      final pause = jsonDecode(savedPause ?? '{}');
+      if (pause['appId'] == appId && pause['sdkVersion'] == Login.currentSdkVersion) {
+        pausedUntil = DateTime.fromMillisecondsSinceEpoch(pause['until']);
+      }
+    } catch (e) {
+      InnerLog().w('saved pause is corrupt, deleting it: $e');
+    }
+    if (paused) {
+      InnerLog().w('Shipbook is paused until ${pausedUntil!.toUtc().toIso8601String()} (from an earlier run); nothing will be sent');
+    } else if (savedPause != null) {
+      Storage().remove(_pauseKey);
+    }
     return await innerLogin();
   }
 
   Future<String?> innerLogin() async {
+    if (paused) return null;
+    pausedUntil = null;
+
     await loginObj!.initializationDone;
     if (isInLoginRequest || loginObj == null) return null;
 
@@ -137,6 +160,13 @@ class SessionManager {
     }
 
     LogManager().config(config);
+  }
+
+  void pause(DateTime until) {
+    pausedUntil = until;
+    token = null;
+    sessionLink = null;
+    Storage().setString(_pauseKey, jsonEncode({'appId': appId, 'sdkVersion': Login.currentSdkVersion, 'until': until.millisecondsSinceEpoch}));
   }
 
   void logout() {

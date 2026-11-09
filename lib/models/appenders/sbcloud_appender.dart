@@ -99,6 +99,7 @@ class SBCloudAppender implements BaseAppender {
 
   void _userChangeController(dynamic data) {
     InnerLog().d('user change event');
+    if (SessionManager().paused) return;
     if (data is User) { 
       saveToStorage(data);
       _createTimer();
@@ -114,6 +115,10 @@ class SBCloudAppender implements BaseAppender {
 
   @override
   Future<void> push(log) async {
+    if (SessionManager().paused) return;
+    // pausedUntil stays set after a pause has ended, until a login follows
+    if (SessionManager().pausedUntil != null) SessionManager().innerLogin();
+
     if (log.type == LogType.message) {
       await _pushMessage(log as Message);
     } else if (log.type == LogType.exception) {

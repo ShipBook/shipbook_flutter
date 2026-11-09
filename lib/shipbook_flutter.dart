@@ -15,9 +15,16 @@ import 'inner_log.dart';
 import 'log.dart';
 
 class Shipbook {
-  static Future<String?> start(String appId, String appKey, [String? url]) async {
-    await Storage().initialized;
-    return await SessionManager().login(appId, appKey);
+  static Future<String?>? _sessionUrl;
+
+  static Future<String?> start(String appId, String appKey, [String? url]) {
+    final sessionManager = SessionManager();
+    final sessionUrl = _sessionUrl;
+    if (sessionUrl != null && appId == sessionManager.appId && appKey == sessionManager.appKey) return sessionUrl;
+
+    sessionManager.appId = appId;
+    sessionManager.appKey = appKey;
+    return _sessionUrl = Storage().initialized.then((_) => sessionManager.login(appId, appKey));
   }
 
   static void enableInnerLog(bool enable) {
