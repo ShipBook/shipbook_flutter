@@ -174,9 +174,10 @@ class SBCloudAppender implements BaseAppender {
       timer = null;
     }
 
-    // loadSessionData empties the storage, so it must not run while nothing can be sent
+    // while nothing can be sent the saved logs stay untouched (loadSessionData would empty the storage)
     if (SessionManager().token == null || SessionManager().stopped) return;
 
+    final batch = Storage().getList(SESSION_DATA);
     final sessionsData = loadSessionData();
 
     if (sessionsData.isEmpty) return;
@@ -188,6 +189,9 @@ class SBCloudAppender implements BaseAppender {
     if (ConnectionClient.isOk(resp)) {
       InnerLog().d('got ok of upload ${resp.body}');
 
+    } else if (SessionManager().stopped) {
+      // a refused or busy answer must not lose the batch: it goes back in front of what was saved meanwhile
+      Storage().setList(SESSION_DATA, [...batch!, ...?Storage().getList(SESSION_DATA)]);
     } else {
       InnerLog().e('failed upload ${resp.body}');
     }

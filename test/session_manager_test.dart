@@ -340,7 +340,7 @@ void main() {
           expect(await SessionManager().innerLogin(), isNull);
           expect(await SessionManager().refreshToken(), isFalse);
           expect(requests, isEmpty);
-          expect(Storage().getListSize(SESSION_DATA), 0);
+          expect(Storage().getListSize(SESSION_DATA), 2, reason: 'the refused batch (its session and its log) stays, nothing from during the pause is added');
           expect(local.messages, hasLength(3));
           expect(local.exceptions, hasLength(1));
         },
@@ -357,6 +357,31 @@ void main() {
 
       expect(paths(), ['/v2/auth/loginSdk']);
       expect(SessionManager().pausedUntil!.difference(DateTime.now()).inDays, closeTo(30, 1));
+    });
+
+    test('a batch whose upload was refused goes out after the pause', () async {
+      var refuse = true;
+      await withServer(
+        (request) => refuse && !request.url.path.endsWith('auth/loginSdk') ? http.Response('', 429, headers: {'x-shipbook-pause': '120', 'retry-after': '120'}) : loginOk(),
+        () async {
+          await Shipbook.start('appId', 'appKey');
+          log(Severity.Error);
+          Shipbook.flush();
+          await pumpEventQueue();
+          log(Severity.Error);
+
+          refuse = false;
+          SessionManager().pausedUntil = DateTime.now().subtract(const Duration(seconds: 1));
+          log(Severity.Error);
+          await pumpEventQueue();
+          Shipbook.flush();
+          await pumpEventQueue();
+        },
+      );
+
+      expect(paths(), ['/v2/auth/loginSdk', '/v2/sessions/uploadSavedData', '/v2/auth/loginSdk', '/v2/sessions/uploadSavedData']);
+      final sent = (jsonDecode(requests.last.body) as List).expand((session) => session['logs'] as List);
+      expect(sent, hasLength(2), reason: 'the refused batch and the log after the pause, not the one from during it');
     });
 
     test('when the pause ends, the next log logs in once and logs are kept again', () async {
@@ -384,6 +409,7 @@ void main() {
 
   group('while backing off', () {
     test('nothing is sent, logs and crashes are kept and go out afterwards on the same session', () async {
+      Shipbook.enableInnerLog(true);
       var busy = true;
       await withServer(
         (request) => busy && !request.url.path.endsWith('auth/loginSdk') ? http.Response('', 503, headers: {'retry-after': '120'}) : loginOk(),
@@ -391,6 +417,7 @@ void main() {
           await Shipbook.start('appId', 'appKey');
           log(Severity.Error);
           Shipbook.flush();
+          log(Severity.Error);
           await pumpEventQueue();
           expect(SessionManager().stopped, isTrue, reason: 'the upload was answered with a 503');
           requests.clear();
@@ -405,7 +432,7 @@ void main() {
           expect(response.statusCode, 429);
           expect(await SessionManager().innerLogin(), isNull);
           expect(requests, isEmpty);
-          expect(savedLogs(), 2);
+          expect(savedLogs(), 4, reason: 'the batch that was answered busy, the log saved while it was in flight, and the two since');
           expect(SessionManager().token, 'token');
           expect(Storage().getString('pause'), isNull);
 
@@ -419,8 +446,11 @@ void main() {
 
       expect(paths(), ['/v2/sessions/uploadSavedData'], reason: 'the token is still there, so no new login');
       final sessions = jsonDecode(requests.single.body) as List;
-      expect(sessions.single['token'], 'token');
-      expect(sessions.single['logs'], hasLength(3));
+      final orderIds = sessions.expand((session) => session['logs'] as List).map((log) => log['orderId'] as int).toList();
+      expect(sessions.map((session) => session['token']), ['token', 'token'], reason: 'the busy batch, then one batch that no flush during the back-off touched');
+      expect(orderIds, hasLength(5));
+      expect(orderIds, [...orderIds]..sort(), reason: 'the batch that was answered busy goes back in front');
+      expect(printed, isNot(contains(contains('failed upload'))));
     });
 
     test('a login answered busy is tried again by the first log afterwards', () async {
@@ -450,6 +480,32 @@ void main() {
     });
   });
 
+  group('the login error line', () {
+    for (final (name, status, headers) in [
+      ('a pause', 401, {'x-shipbook-pause': '120', 'retry-after': '120'}),
+      ('a busy 429', 429, <String, String>{}),
+      ('a busy 503', 503, <String, String>{}),
+    ]) {
+      test('is not printed when the answer was $name', () async {
+        Shipbook.enableInnerLog(true);
+
+        await withServer((request) => http.Response('', status, headers: headers), () => Shipbook.start('appId', 'appKey'));
+
+        expect(SessionManager().stopped, isTrue);
+        expect(printed, isNot(contains(contains('loginSdk rejected'))));
+        expect(printed, isNot(contains(contains("didn't succeed to log"))));
+      });
+    }
+
+    test('is printed for a 4xx with neither signal', () async {
+      Shipbook.enableInnerLog(true);
+
+      await withServer((request) => http.Response('', 401, headers: {'retry-after': '120'}), () => Shipbook.start('appId', 'appKey'));
+
+      expect(printed, contains(contains('loginSdk rejected with 401')));
+    });
+  });
+
   group('saved pause', () {
     String saved({String appId = 'appId', String sdkVersion = Login.currentSdkVersion, Duration remaining = const Duration(hours: 1)}) =>
         jsonEncode({'appId': appId, 'sdkVersion': sdkVersion, 'until': DateTime.now().add(remaining).millisecondsSinceEpoch});
@@ -475,7 +531,7 @@ void main() {
       expect(Storage().getListSize(SESSION_DATA), 0);
       expect(LogManager().appenders.keys, containsAll(['console', 'cloud']), reason: 'local logging is still configured');
       expect(printed, contains('Shipbook [WARNING]: paused until ${utc(until)} (from an earlier run); nothing will be sent '));
-      expect(printed, isNot(contains(contains('loginSdk'))), reason: 'login must not even be attempted');
+      expect(printed, isNot(contains(contains('loginObjData'))), reason: 'login must not even be attempted');
     });
 
     for (final (name, pause) in [
