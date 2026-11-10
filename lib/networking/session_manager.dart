@@ -101,7 +101,7 @@ class SessionManager {
       InnerLog().w('saved pause is corrupt, deleting it: $e');
     }
     if (paused && !pausedUntil!.isAfter(DateTime.now().add(_maxPause))) {
-      InnerLog().w('paused until ${_utc(pausedUntil!)} (from an earlier run); nothing will be sent');
+      InnerLog().w('paused until ${pausedUntil!.toUtc().toIso8601String()} (from an earlier run); nothing will be sent');
     } else if (savedPause != null) {
       pausedUntil = null;
       Storage().remove(_pauseKey);
@@ -177,13 +177,13 @@ class SessionManager {
     token = null;
     sessionLink = null;
     Storage().setString(_pauseKey, jsonEncode({'appId': appId, 'sdkVersion': Login.currentSdkVersion, 'until': until.millisecondsSinceEpoch}));
-    InnerLog().w('paused until ${_utc(until)}: the server answered $status with x-shipbook-pause $seconds');
+    InnerLog().w('paused until ${until.toUtc().toIso8601String()}: the server answered $status with x-shipbook-pause $seconds');
   }
 
   void backOff(int retryAfter, int status) {
     final until = DateTime.now().add(Duration(seconds: retryAfter > 0 ? min(retryAfter, _maxBackoffSeconds) : _defaultBackoffSeconds));
     backoffUntil = until;
-    InnerLog().w('backing off until ${_utc(until)}: the server answered $status');
+    InnerLog().w('backing off until ${until.toUtc().toIso8601String()}: the server answered $status');
   }
 
   void loginAfterStop() {
@@ -192,8 +192,6 @@ class SessionManager {
     backoffUntil = null;
     if (token == null) innerLogin();
   }
-
-  String _utc(DateTime time) => '${time.toUtc().toIso8601String().split('.').first}Z';
 
   void logout() {
     token = null;

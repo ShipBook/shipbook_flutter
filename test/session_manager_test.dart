@@ -173,11 +173,6 @@ void main() {
 
   int? secondsUntil(DateTime? time) => time?.difference(DateTime.now()).inSeconds;
 
-  String utc(DateTime time) {
-    final t = time.toUtc();
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${t.year}-${two(t.month)}-${two(t.day)}T${two(t.hour)}:${two(t.minute)}:${two(t.second)}Z';
-  }
 
   Future<http.Response> answered(int status, {String? pause, String? retryAfter}) {
     SessionManager().appId = 'appId';
@@ -255,7 +250,7 @@ void main() {
       expect(SessionManager().token, isNull);
       expect(Shipbook.getSessionHeaders(), isEmpty);
       expect(jsonDecode(Storage().getString('pause')!), {'appId': 'appId', 'sdkVersion': Login.currentSdkVersion, 'until': until.millisecondsSinceEpoch});
-      expect(printed, contains('Shipbook [WARNING]: paused until ${utc(until)}: the server answered 401 with x-shipbook-pause 5184000 '));
+      expect(printed, contains('Shipbook [WARNING]: paused until ${until.toUtc().toIso8601String()}: the server answered 401 with x-shipbook-pause 5184000 '));
     });
 
     test('an expired token answered with a pause is not refreshed', () async {
@@ -307,7 +302,7 @@ void main() {
 
       await answered(503, retryAfter: '120');
 
-      expect(printed, contains('Shipbook [WARNING]: backing off until ${utc(SessionManager().backoffUntil!)}: the server answered 503 '));
+      expect(printed, contains('Shipbook [WARNING]: backing off until ${SessionManager().backoffUntil!.toUtc().toIso8601String()}: the server answered 503 '));
     });
   });
 
@@ -530,7 +525,7 @@ void main() {
       expect(Storage().getString('pause'), pause);
       expect(Storage().getListSize(SESSION_DATA), 0);
       expect(LogManager().appenders.keys, containsAll(['console', 'cloud']), reason: 'local logging is still configured');
-      expect(printed, contains('Shipbook [WARNING]: paused until ${utc(until)} (from an earlier run); nothing will be sent '));
+      expect(printed, contains('Shipbook [WARNING]: paused until ${until.toUtc().toIso8601String()} (from an earlier run); nothing will be sent '));
       expect(printed, isNot(contains(contains('loginObjData'))), reason: 'login must not even be attempted');
     });
 
