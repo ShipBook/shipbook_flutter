@@ -171,7 +171,9 @@ class SessionManager {
     LogManager().config(config);
   }
 
-  void pause(int seconds, int status) {
+  void pause(String? appId, int seconds, int status) {
+    // The answer is for the app that sent the request; a start() with another appId may have replaced it since.
+    if (appId != this.appId) return;
     final until = DateTime.now().add(Duration(seconds: min(seconds, _maxPause.inSeconds)));
     pausedUntil = until;
     token = null;

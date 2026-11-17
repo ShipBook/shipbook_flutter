@@ -253,6 +253,22 @@ void main() {
       expect(printed, contains('Shipbook [WARNING]: paused until ${until.toUtc().toIso8601String()}: the server answered 401 with x-shipbook-pause 5184000 '));
     });
 
+    test('a pause answered for the app started before is ignored', () async {
+      SessionManager().appId = 'appId';
+      SessionManager().token = 'token';
+      await withServer(
+        (request) {
+          SessionManager().appId = 'otherApp'; // what a start() with another appId does while the request is out
+          return http.Response('', 401, headers: {'x-shipbook-pause': '120'});
+        },
+        () => ConnectionClient.request('sessions/uploadSavedData', '[]', HttpMethod.post),
+      );
+
+      expect(requests.single.headers['x-shipbook-app-id'], 'appId');
+      expect(SessionManager().pausedUntil, isNull);
+      expect(Storage().getString('pause'), isNull);
+    });
+
     test('an expired token answered with a pause is not refreshed', () async {
       SessionManager().loginObj = Login('appId', 'appKey');
       SessionManager().token = 'token';
@@ -382,7 +398,7 @@ void main() {
     test('when the pause ends, the next log logs in once and logs are kept again', () async {
       await withServer((request) => loginOk(), () async {
         await Shipbook.start('appId', 'appKey');
-        SessionManager().pause(3600, 429);
+        SessionManager().pause(SessionManager().appId, 3600, 429);
         log(Severity.Error);
         log(Severity.Debug);
         Shipbook.screen('home');
@@ -597,7 +613,7 @@ void main() {
         await pumpEventQueue();
         expect(requests, hasLength(2));
 
-        SessionManager().pause(3600, 429);
+        SessionManager().pause(SessionManager().appId, 3600, 429);
         Shipbook.logout();
         await pumpEventQueue();
         expect(requests, hasLength(2));
