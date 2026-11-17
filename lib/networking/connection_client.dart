@@ -51,7 +51,7 @@ class ConnectionClient {
 
     final pauseSeconds = resp.statusCode < 400 ? 0 : int.tryParse(resp.headers['x-shipbook-pause'] ?? '', radix: 10) ?? 0;
     if (pauseSeconds > 0) {
-      SessionManager().pause(pauseSeconds, resp.statusCode);
+      SessionManager().pause(appId, pauseSeconds, resp.statusCode);
     } else if (resp.statusCode == 429 || resp.statusCode == 503) {
       SessionManager().backOff(int.tryParse(resp.headers['retry-after'] ?? '', radix: 10) ?? 0, resp.statusCode);
     }
