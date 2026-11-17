@@ -8,6 +8,8 @@ import 'common_types.dart';
 import 'user.dart';
 
 class Login {
+  static const currentSdkVersion = '1.1.0';
+
   String appId;
   String appKey;
   String bundelIdentifier = '';
@@ -20,7 +22,7 @@ class Login {
   String osVersion = '';
   String appVersion = '';
   String appBuild = '';
-  String sdkVersion = '1.1.0';
+  String sdkVersion = currentSdkVersion;
   String manufacturer = '';
   String deviceName = '';
   String deviceModel = '';

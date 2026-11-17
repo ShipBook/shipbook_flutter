@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -47,6 +48,11 @@ void main() {
       final login2 = Login.fromJson(jsonMap2);
       expect(login.appId, login2.appId);
       expect(login.appKey, login2.appKey);
+    });
+
+    test('the SDK version sent to the server matches pubspec.yaml', () {
+      final pubspecVersion = RegExp(r'^version:\s*(\S+)', multiLine: true).firstMatch(File('pubspec.yaml').readAsStringSync())!.group(1);
+      expect(Login.currentSdkVersion, pubspecVersion, reason: 'bump Login.currentSdkVersion together with the pubspec version');
     });
 
 }
