@@ -17,7 +17,7 @@ import 'log.dart';
 class Shipbook {
   static Future<String?>? _sessionUrl;
 
-  static Future<String?> start(String appId, String appKey, [String? url]) {
+  static Future<String?> start(String appId, String appKey) {
     final sessionManager = SessionManager();
     final sessionUrl = _sessionUrl;
     if (sessionUrl != null && appId == sessionManager.appId && appKey == sessionManager.appKey) return sessionUrl;
