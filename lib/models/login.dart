@@ -8,7 +8,7 @@ import 'common_types.dart';
 import 'user.dart';
 
 class Login {
-  static const currentSdkVersion = '1.1.0';
+  static const currentSdkVersion = '2.0.0';
 
   String appId;
   String appKey;

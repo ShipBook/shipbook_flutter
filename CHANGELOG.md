@@ -1,3 +1,11 @@
+## 2.0.0
+
+* Upgrade to get an SDK that follows the Shipbook server: it stops sending when the server refuses your app or is busy, and calling `Shipbook.start` again costs nothing.
+* The SDK obeys the server. If the server refuses the app (an unknown app ID, or traffic far past fair use), the SDK pauses: it sends nothing and drops new logs until the pause ends, at most 30 days and across restarts. If the server or a proxy answers busy (429 or 503), it waits (the `Retry-After` time, 5 minutes without one, at most an hour) and sends the saved logs afterwards. `Shipbook.enableInnerLog(true)` prints `paused until …` or `backing off until …`.
+* Every request carries `x-shipbook-app-id` and `x-shipbook-sdk: flutter/2.0.0`.
+* Calling `Shipbook.start` again with the same app ID and key returns the first call's result without logging in again.
+* Removed the optional `url` parameter of `Shipbook.start`, which was never read. Use `Shipbook.setConnectionUrl` to point the SDK at another server.
+
 ## 1.1.0
 
 * Added `Shipbook.getSessionHeaders()`. Add its headers to requests toward your own backend, and the Shipbook console links this app session to the sessions those requests create in your Node.js backend. It returns an empty map until login completes, so spreading it is always safe.
