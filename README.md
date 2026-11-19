@@ -10,7 +10,7 @@ Add to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  shipbook_flutter: ^1.0.0
+  shipbook_flutter: ^2.0.1
 ```
 
 Then run:
