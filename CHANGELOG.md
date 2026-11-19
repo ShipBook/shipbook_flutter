@@ -1,3 +1,8 @@
+## 2.0.1
+
+* Fixed apps on Windows, macOS, Linux and web never connecting to Shipbook. The SDK sent no device ID on those platforms, so the server turned the login down. On web, the SDK stopped before it even tried to log in. The SDK now reads the device ID on every platform. Where there is none, it creates a random ID and keeps it on the device.
+* If reading the device or app info fails, the SDK now logs a warning and logs in anyway, instead of waiting forever.
+
 ## 2.0.0
 
 * Upgrade to get an SDK that follows the Shipbook server: it stops sending when the server refuses your app or is busy, and calling `Shipbook.start` again costs nothing.
