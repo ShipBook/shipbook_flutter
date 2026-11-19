@@ -94,16 +94,18 @@ class Login {
     if (udid.isEmpty) {
       // The server rejects a login without a udid, and web or some desktops have no device id.
       await Storage().initialized;
-      udid = Storage().getString(_udidKey) ?? '';
-    }
-    if (udid.isEmpty) {
-      final random = Random.secure();
-      final bytes = List.generate(16, (_) => random.nextInt(256));
-      bytes[6] = (bytes[6] & 0x0f) | 0x40;
-      bytes[8] = (bytes[8] & 0x3f) | 0x80;
-      final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
-      udid = '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
-      Storage().setString(_udidKey, udid);
+      final storedUdid = Storage().getString(_udidKey);
+      if (storedUdid != null) {
+        udid = storedUdid;
+      } else {
+        final random = Random.secure();
+        final bytes = List.generate(16, (_) => random.nextInt(256));
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        final hex = bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+        udid = '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
+        Storage().setString(_udidKey, udid);
+      }
     }
 
     try {
