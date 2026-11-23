@@ -1,3 +1,16 @@
+## 2.1.0
+
+### Added
+* App-state events. The SDK now sends an event when the app becomes active, inactive or goes to the background, with the screen orientation, as the React Native and browser SDKs do. The `eventLoggingDisabled` config turns them off.
+
+### Changed
+* `log.e/w/i/d/v` and `Log.error/warning/info/debug/verbose` take any caught error, not only an `Error`, and an optional stack trace: `catch (error, stackTrace) { log.e('Payment failed', error, stackTrace); }`. Code that passes an `Error` keeps working.
+
+### Fixed
+* A logged error now shows the stack of where it was thrown, not of the `log.e` call. Without a stack trace argument, an `Error` uses its own.
+* Uncaught errors kept every frame except the one that threw. That frame is now first, so Loglytics groups the crash by the line that failed.
+* Screen events kept the upload's time instead of the time the screen opened, so they sorted after the logs that followed them.
+
 ## 2.0.1
 
 * Fixed apps on Windows, macOS, Linux and web never connecting to Shipbook. The SDK sent no device ID on those platforms, so the server turned the login down. On web, the SDK stopped before it even tried to log in. The SDK now reads the device ID on every platform. Where there is none, it creates a random ID and keeps it on the device.
