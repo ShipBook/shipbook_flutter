@@ -65,6 +65,21 @@ void main() {
       expect(json.containsKey('stackTrace') || json.containsKey('callStackSymbols'), isTrue);
     });
 
+    test('SBException.fromError keeps the frame that threw', () {
+      late Object error;
+      late StackTrace stack;
+      try {
+        _Checkout().pay();
+      } catch (e, s) {
+        error = e;
+        stack = s;
+      }
+      final exception = SBException.fromError(error, stack);
+
+      expect(exception.stackTrace!.first.declaringClass, '_Checkout');
+      expect(exception.stackTrace!.first.methodName, 'pay');
+    });
+
     test('SBException deserializes from JSON correctly', () {
       const error = FormatException('bad format');
       final stack = StackTrace.current;
@@ -77,4 +92,8 @@ void main() {
       expect(restored.type, LogType.exception);
     });
   });
+}
+
+class _Checkout {
+  void pay() => throw const FormatException('bad card');
 }

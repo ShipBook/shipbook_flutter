@@ -34,11 +34,11 @@ void main() async {
       const token = 'testing'; 
       SessionManager().token = token;
       List<BaseLog> logs = [];
-      logs.add(Message('message 1', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 1));
-      logs.add(Message('message 2', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 2));
-      logs.add(Message('message 3', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 3));
-      logs.add(Message('message 4', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 4));
-      logs.add(Message('message 5', Severity.Debug, 'tag', null, null, 'test', 'sbcloud_appender_test.dart', 5));
+      logs.add(Message('message 1', Severity.Debug, 'tag', null, null, null, 'test', 'sbcloud_appender_test.dart', 1));
+      logs.add(Message('message 2', Severity.Debug, 'tag', null, null, null, 'test', 'sbcloud_appender_test.dart', 2));
+      logs.add(Message('message 3', Severity.Debug, 'tag', null, null, null, 'test', 'sbcloud_appender_test.dart', 3));
+      logs.add(Message('message 4', Severity.Debug, 'tag', null, null, null, 'test', 'sbcloud_appender_test.dart', 4));
+      logs.add(Message('message 5', Severity.Debug, 'tag', null, null, null, 'test', 'sbcloud_appender_test.dart', 5));
 
       cloudAppender.saveToStorage(logs);
 
