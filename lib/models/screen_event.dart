@@ -6,11 +6,11 @@ import 'base_event.dart';
 class ScreenEvent extends BaseEvent {
   final String name;
 
-  ScreenEvent(this.name) : super(LogType.screenEvent);
+  ScreenEvent(this.name, [Json? json]) : super(LogType.screenEvent, json);
 
   @override
   factory ScreenEvent.fromJson(Json json) {
-    return ScreenEvent(json['name']);
+    return ScreenEvent(json['name'], json);
   }
 
   @override
