@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'inner_log.dart';
 import 'log_manager.dart';
 import 'models/app_event.dart';
 
@@ -12,12 +13,14 @@ class EventManager with WidgetsBindingObserver {
   String? _state;
 
   void enableAppState() {
+    InnerLog().i('event logging enabled');
     if (_observing) return;
     _observing = true;
     WidgetsBinding.instance.addObserver(this);
   }
 
   void removeAppState() {
+    InnerLog().i('event logging disabled');
     if (!_observing) return;
     _observing = false;
     _state = null;
