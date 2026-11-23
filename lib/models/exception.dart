@@ -13,7 +13,7 @@ class SBException extends BaseLog {
 
   factory SBException.fromError(Object error, StackTrace stackTrace, {String? context}) {
     final stackTraceString = stackTrace.toString();
-    final parsed = StackTraceParser.parse(stackTraceString);
+    final parsed = StackTraceParser.parse(stackTraceString, skipFrames: 0);
     final symbols = stackTraceString.split('\n').where((l) => l.isNotEmpty).toList();
     final reason = context != null ? '$context: $error' : error.toString();
 

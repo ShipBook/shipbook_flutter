@@ -85,5 +85,51 @@ void main() {
       expect(msg.exception!.name, 'ArgumentError');
       expect(msg.exception!.reason, contains('bad arg'));
     });
+
+    test('log.e() takes a caught Exception and its stack trace', () {
+      final log = Log('test');
+      try {
+        _Checkout().pay();
+      } catch (error, stack) {
+        log.e('payment failed', error, stack);
+      }
+
+      final exception = testAppender.messages.single.exception!;
+      expect(exception.name, 'FormatException');
+      expect(exception.reason, contains('bad card'));
+      expect(exception.stackTrace.first.declaringClass, '_Checkout');
+      expect(exception.stackTrace.first.methodName, 'pay');
+    });
+
+    test('log.e() without a stack trace uses a thrown Error\'s own stack', () {
+      final log = Log('test');
+      try {
+        _Checkout().validate();
+      } catch (error) {
+        log.e('validation failed', error);
+      }
+
+      final exception = testAppender.messages.single.exception!;
+      expect(exception.name, 'StateError');
+      expect(exception.stackTrace.first.methodName, 'validate');
+    });
+
+    test('static Log.warning() takes a caught Exception and its stack trace', () {
+      try {
+        _Checkout().pay();
+      } catch (error, stack) {
+        Log.warning('payment retry', error, stack);
+      }
+
+      final msg = testAppender.messages.single;
+      expect(msg.severity, Severity.Warning);
+      expect(msg.exception!.name, 'FormatException');
+      expect(msg.exception!.stackTrace.first.methodName, 'pay');
+    });
   });
+}
+
+class _Checkout {
+  void pay() => throw const FormatException('bad card');
+  void validate() => throw StateError('empty cart');
 }

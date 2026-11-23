@@ -163,7 +163,7 @@ void main() {
 
   http.Response numberedLogin(http.Request request) => loginOk('$sessionUrl/${requests.length}');
 
-  void log(Severity severity) => LogManager().push(Message('message', severity, 'test', null, null, 'function', 'file.dart', 1));
+  void log(Severity severity) => LogManager().push(Message('message', severity, 'test', null, null, null, 'function', 'file.dart', 1));
 
   int savedLogs() => Storage().getList(SESSION_DATA)?.where((item) => item['type'] == 'log').length ?? 0;
 

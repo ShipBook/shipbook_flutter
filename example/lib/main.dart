@@ -122,8 +122,8 @@ class MyHomePage extends StatelessWidget {
             _logButton(context, 'Log Exception', () {
               try {
                 throw StateError('Test exception from example app');
-              } catch (e) {
-                log.e('Caught exception', e as Error);
+              } catch (error, stackTrace) {
+                log.e('Caught exception', error, stackTrace);
               }
             }),
             _logButton(context, 'Throw Uncaught Exception', () {

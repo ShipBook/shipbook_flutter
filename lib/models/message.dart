@@ -37,7 +37,7 @@ class Message extends BaseLog {
   Severity severity;
   String? tag; // it is initialized after the promise.
   List<StackTraceElement>? stackTrace;
-  Error? error;
+  Object? error;
   MessageException? exception;
   String? function;
   String? fileName;
@@ -50,16 +50,22 @@ class Message extends BaseLog {
           this.tag,
           this.stackTrace,
           this.error,
+          StackTrace? errorStackTrace,
           this.function,
           this.fileName,
           this.lineNumber,
           [Json? json]) : super(LogType.message, json) {
+    final error = this.error;
     if (error != null) {
-      final errorStackTrace = StackTraceParser.parse(StackTrace.current.toString());
+      // An Exception carries no stack of its own; an Error has one once thrown.
+      final ownStackTrace = errorStackTrace ?? (error is Error ? error.stackTrace : null);
+      final parsedStackTrace = ownStackTrace != null
+          ? StackTraceParser.parse(ownStackTrace.toString(), skipFrames: 0)
+          : StackTraceParser.parse(StackTrace.current.toString());
       exception = MessageException(
         error.runtimeType.toString(),
         error.toString(),
-        errorStackTrace ?? [],
+        parsedStackTrace ?? [],
       );
     }
 
@@ -109,6 +115,7 @@ class Message extends BaseLog {
       json['tag'],
       stackTrace,
       json['error'],
+      null,
       json['function'],
       json['fileName'],
       json['lineNumber'],
@@ -145,12 +152,12 @@ class Message extends BaseLog {
 }
 
 class StackTraceParser {
-  static List<StackTraceElement>? parse(String? stackTrace) {
+  static List<StackTraceElement>? parse(String? stackTrace, {int skipFrames = 1}) {
     if (stackTrace == null) return null;
     final lines = stackTrace.split('\n');
     final elements = <StackTraceElement>[];
 
-    for (var i = 1; i < lines.length; i++) {
+    for (var i = skipFrames; i < lines.length; i++) {
       final line = lines[i];
       if (line.isEmpty) continue;
       final element = StackTraceElement.tryParse(line);

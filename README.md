@@ -42,11 +42,11 @@ log.i('General information');
 log.w('Warning message');
 log.e('Error message');
 
-// Log with an error object
+// Log a caught error or exception with its stack trace
 try {
-  throw StateError('Something failed');
-} catch (error) {
-  log.e('Operation failed', error);
+  await api.checkout(cart);
+} catch (error, stackTrace) {
+  log.e('Checkout failed', error, stackTrace);
 }
 ```
 
