@@ -1,3 +1,4 @@
+import 'package:shipbook_flutter/models/base_event.dart';
 import 'package:shipbook_flutter/models/message.dart';
 import 'package:shipbook_flutter/models/base_log.dart';
 import 'package:shipbook_flutter/models/exception.dart';
@@ -9,6 +10,7 @@ class TestAppender implements BaseAppender {
   final String name;
   final List<Message> messages = [];
   final List<SBException> exceptions = [];
+  final List<BaseEvent> events = [];
 
   TestAppender(this.name, [Json? config]);
 
@@ -19,6 +21,7 @@ class TestAppender implements BaseAppender {
   void push(BaseLog log) {
     if (log is Message) messages.add(log);
     if (log is SBException) exceptions.add(log);
+    if (log is BaseEvent) events.add(log);
   }
 
   @override

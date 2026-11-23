@@ -1,5 +1,6 @@
 import 'common_types.dart';
 
+import 'app_event.dart';
 import 'exception.dart';
 import 'message.dart';
 import 'screen_event.dart';
@@ -43,6 +44,8 @@ class BaseLog {
         return SBException.fromJson(json);
       case 'screenEvent':
         return ScreenEvent.fromJson(json);
+      case 'appEvent':
+        return AppEvent.fromJson(json);
       default:
         throw Exception('Unknown log type');
     }
